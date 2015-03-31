@@ -1,0 +1,3 @@
+# IndepStudy
+INDEPENDENT STUDY
+EECS481 and EECS100 Group Sort

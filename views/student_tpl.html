@@ -8,15 +8,21 @@
   <body>
     {{ header|safe }}
     <div class="container">
-      <div class="jumbotron">
-        Welcome to the Group Sorting Hat!
-      </div>
+      <form>
+        <div class="form-group">
+          <label for="selectClass">Select Class</label>
+            <select class="form-control">
+              {% for classname in class_list %}
+                <option>{{ classname }}</option>
+              {% endfor %}
+            </select>
+      </form>
     </div>
-
   <!-- javascript at end of body for better load times -->
   <script src="jquery-1.11.2.min.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
   <script src="bootstrap/js/bootstrap-switch.min.js"></script>
-  <script src="js/client.js"></script>
   </body>
 </html>
+
+

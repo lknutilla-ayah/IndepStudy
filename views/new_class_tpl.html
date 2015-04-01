@@ -1,0 +1,10 @@
+{% extends 'layout.html' %}
+{% block inner %}
+    {{ header|safe }}
+    <div class="container">
+      <div class="jumbotron">
+        <!--{% block content %}{% endblock %}-->
+        {{ content|safe }}
+      </div>
+    </div>
+{% endblock %}

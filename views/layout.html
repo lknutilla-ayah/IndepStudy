@@ -15,12 +15,14 @@
   <!-- javascript at end of body for better load times -->
   {% block foot %}
   <script src="jquery-1.11.2.min.js"></script>
+  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
   {% if date %}<script src="js/dates.js"></script>{% endif %}
-  {% if !date %}
+  {% if files %}
   <script src="js/handsontable.full.min.js"></script>
   <script src="js/files.js"></script>
   {% endif %}
+  <script src="js/sort.js"></script>
   {% endblock %}
   </body>
 </html>

@@ -1,0 +1,75 @@
+{% extends 'layout.html' %}
+{% block inner %}
+    <div class="container-fluid">
+        <!--Sort Functions Row-->
+        <div class="row-fluid">
+            <div class="well">
+                <label for="sort_fn" class="control-label">Sort Functions</label>
+                <div id="sort_fn">
+                    <label for="group_size">Set Max/Min Group Sizes</label>
+                    <div id="group_size">
+                        <input type="number" name="min_sz" value="3" min="0" style="width: 40px; margin: 5px">
+                        <input type="number" name="max_sz" value="5" min="0" style="width: 40px; margin: 5px">
+                    </div>
+                    <button type="button" id="srt_fem" class="btn btn-primary">Sort Females: </button><input type="number" name="num_fem" value="2" min="0" style="width: 40px; margin: 5px">
+                    <button type="button" id="sort_frst" class="btn btn-primary">Sort Students into First Choice</button>
+                    <button type="button" id="ordr_scr" class="btn btn-primary">Order by Score</button><!--Orders students in groups by score-->
+                    <button type="button" id="sort_frst" class="btn btn-primary">Sort Non-Preferences</button>
+                    <div class="btn-group">
+                        <button type="button" id="ordr_scr" class="btn btn-default">Lock Proposal Presenters</button>
+                        <button type="button" id="ordr_scr" class="btn btn-default">Lock Proposal Presenter Preferences</button>
+                        <button type="button" id="ordr_scr" class="btn btn-default">Lock Female Students</button>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                          <input type="checkbox" name="2nd" id="2nd" checked> Sort to 2nd Choice
+                        </label>
+                      </div>
+                      <div class="checkbox">
+                        <label>
+                          <input type="checkbox" name="3rd" id="3rd"> Sort to 3rd Choice
+                        </label>
+                      </div>
+                </div>
+            </div>
+        </div>
+        <!--Class and Group Data-->
+        <div class="row-fluid">
+            <div class="col-md-3">
+                <label for="sortable_class" class="control-label">Class List</label>
+                <ul id="sortable_class" class="droptrue list-group">
+                    {% for student in class_data.classlist %}
+                    <li class="ui-state-default list-group-item student" id="{{ student.name }}">
+                    {% set count = loop.index %}
+                    {{ count }}
+                    <button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></button> 
+                    <label for="{{ student.name }}" id="name_{{ student.name }}">{{ student.name }}</label>
+                    <label for="{{ student.name }}" id="gender_{{ student.name }}">{{ student.gender }}</label>
+                    <label for="{{ student.name }}" id="score_{{ student.name }}">{{ student.score }}</label>
+                    <label for="{{ student.name }}" id="first_{{ student.name }}">{{ student.first }}</label>
+                    <label for="{{ student.name }}" id="second_{{ student.name }}">{{ student.second }}</label>
+                    <label for="{{ student.name }}" id="third_{{ student.name }}">{{ student.third }}</label> 
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-9">
+                <div class="row-fluid">
+                {% for group in class_data.grouplist %}
+                    <div class="col-md-4">
+                        <label for="{{ group.id }}" id="gid_{{ group.id }}" class="control-label">{{ group.id }}</label>.)
+                        <label for="{{ group.id }}" id="gname_{{ group.id }}" class="control-label">{{ group.groupname }}</label> - 
+                        <label for="{{ group.id }}" id="glead_{{ group.id }}" class="control-label">{{ group.leader }}</label>
+                        <input type ="number" value="0" id="gcount_{{ group.id }}" style="width: 40px; margin: 5px" readonly="true"> 
+                        <div id="group_{{ group.id }}"class="btn-group" role="group" aria-label="...">
+                          <button type="button" class="btn btn-default add_mem" id="a_{{ group.id }}"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+                          <button type="button" class="btn btn-default remove_mem" id="r_{{ group.id }}"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+                          <button type="button" class="btn btn-default delete_grp" id="d_{{ group.id }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                        </div>
+                        <ul id="{{ group.id }}" class="droptrue group_mems"></ul> 
+                    </div>
+                {% endfor %}       
+            </div>
+        </div>
+    </div>
+{% endblock %}

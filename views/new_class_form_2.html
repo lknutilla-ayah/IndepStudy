@@ -3,8 +3,10 @@
 <script>
   var gender = "{{ class_obj.gender }}";
   var score = "{{ class_obj.score }}";
+  var stud_pref = "{{ class_obj.stud_pref }}";
+  var lead_pref = "{{ class_obj.lead_pref }}";
 </script>
-<form class="form-horizontal" enctype="multipart/form-data" method="POST">
+<form class="form-horizontal" enctype="multipart/form-data">
   <h5>Paste Class Data: </h5>
   <div class="form-group">
     <div id = "students_enter">
@@ -17,7 +19,7 @@
   </div>  
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-       <button type="submit" class="btn btn-default">Submit</button>
+       <button id = "submit" type="submit" class="btn btn-default">Submit</button>
     </div>
   </div>
 </form>

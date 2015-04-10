@@ -1,35 +1,50 @@
 {% extends 'layout.html' %}
 {% block inner %}
+<script>
+  var set_gender = "{{ class_data.gender }}";
+  var set_score = "{{ class_data.score }}";
+  // var stud_pref = "{{ class_obj.stud_pref }}";
+  // var lead_pref = "{{ class_obj.lead_pref }}";
+</script>
     <div class="container-fluid">
         <!--Sort Functions Row-->
         <div class="row-fluid">
             <div class="well">
-                <label for="sort_fn" class="control-label">Sort Functions</label>
+                <label for="sort_fn" class="control-label"><h2>Sort Functions</h2></label>
                 <div id="sort_fn">
-                    <label for="group_size">Set Max/Min Group Sizes</label>
-                    <div id="group_size">
-                        <input type="number" name="min_sz" value="3" min="0" style="width: 40px; margin: 5px">
-                        <input type="number" name="max_sz" value="5" min="0" style="width: 40px; margin: 5px">
+                    <div class="col-md-3">
+                        <label for="grp_range">Set Max/Min Group Sizes</label>
+                        <input type="text" id="grp_range" name="grp_range" value=""/>
                     </div>
-                    <button type="button" id="srt_fem" class="btn btn-primary">Sort Females: </button><input type="number" name="num_fem" value="2" min="0" style="width: 40px; margin: 5px">
-                    <button type="button" id="sort_frst" class="btn btn-primary">Sort Students into First Choice</button>
-                    <button type="button" id="ordr_scr" class="btn btn-primary">Order by Score</button><!--Orders students in groups by score-->
-                    <button type="button" id="sort_frst" class="btn btn-primary">Sort Non-Preferences</button>
-                    <div class="btn-group">
-                        <button type="button" id="ordr_scr" class="btn btn-default">Lock Proposal Presenters</button>
-                        <button type="button" id="ordr_scr" class="btn btn-default">Lock Proposal Presenter Preferences</button>
-                        <button type="button" id="ordr_scr" class="btn btn-default">Lock Female Students</button>
-                    </div>
-                    <div class="checkbox">
-                        <label>
-                          <input type="checkbox" name="2nd" id="2nd" checked> Sort to 2nd Choice
-                        </label>
-                      </div>
-                      <div class="checkbox">
-                        <label>
-                          <input type="checkbox" name="3rd" id="3rd"> Sort to 3rd Choice
-                        </label>
-                      </div>
+                    <!--<div class="col-md-5" id="cls_srt">-->
+                        <label for="cls_srt">Class List Sort Functions</label>
+                        {% if class_data.gender %}
+                        <button type="button" id="srt_fem" class="btn btn-primary">Sort Females: </button><input type="number" name="num_fem" id ="num_fem" value="2" min="0" style="width: 40px; margin: 5px">
+                        {% endif %}
+                        <button type="button" id="sort_frst" class="btn btn-primary">Sort Students into Top Choice</button>
+                    <!--</div>-->
+                    <!--<div class="col-md-5" id="grp_srt">-->
+                        <label for="grp_srt">Group Sort Functions</label>
+                        {% if class_data.score %}
+                        <button type="button" id="ordr_scr" class="btn btn-primary">Order by Score</button>
+                        {% endif %}
+                        <div class="btn-group">
+                            <button type="button" id="ordr_scr" class="btn btn-default">Lock Proposal Presenters</button>
+                            <button type="button" id="ordr_scr" class="btn btn-default">Lock Proposal Presenter Preferences</button>
+                            <button type="button" id="ordr_scr" class="btn btn-default">Lock Female Students</button>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" name="2nd" id="2nd" checked> Sort to 2nd Choice
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" name="3rd" id="3rd"> Sort to 3rd Choice
+                            </label>
+                        </div>
+                    <!--</div>-->
+                    <button type="button" id="srt_non" class="btn btn-primary">Sort Non-Preference Group</button>
                 </div>
             </div>
         </div>
@@ -40,15 +55,19 @@
                 <ul id="sortable_class" class="droptrue list-group">
                     {% for student in class_data.classlist %}
                     <li class="ui-state-default list-group-item student" id="{{ student.name }}">
-                    {% set count = loop.index %}
-                    {{ count }}
-                    <button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></button> 
-                    <label for="{{ student.name }}" id="name_{{ student.name }}">{{ student.name }}</label>
-                    <label for="{{ student.name }}" id="gender_{{ student.name }}">{{ student.gender }}</label>
-                    <label for="{{ student.name }}" id="score_{{ student.name }}">{{ student.score }}</label>
-                    <label for="{{ student.name }}" id="first_{{ student.name }}">{{ student.first }}</label>
-                    <label for="{{ student.name }}" id="second_{{ student.name }}">{{ student.second }}</label>
-                    <label for="{{ student.name }}" id="third_{{ student.name }}">{{ student.third }}</label> 
+                        {% set count = loop.index %}
+                        {{ count }}
+                        <button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></button> 
+                        <label for="{{ student.name }}" id="name_{{ student.name }}">{{ student.name }}</label>
+                        {% if class_data.gender %}
+                        <label for="{{ student.name }}" id="gender_{{ student.name }}">{{ student.gender }}</label>
+                        {% endif %}
+                        {% if class_data.score %}
+                        <label for="{{ student.name }}" id="score_{{ student.name }}">{{ student.score }}</label>
+                        {% endif %}
+                        <label for="{{ student.name }}" id="first_{{ student.name }}">{{ student.first }}</label>
+                        <label for="{{ student.name }}" id="second_{{ student.name }}">{{ student.second }}</label>
+                        <label for="{{ student.name }}" id="third_{{ student.name }}">{{ student.third }}</label> 
                     </li>
                     {% endfor %}
                 </ul>
@@ -56,7 +75,7 @@
             <div class="col-md-9">
                 <div class="row-fluid">
                 {% for group in class_data.grouplist %}
-                    <div class="col-md-4">
+                    <div class="col-md-4" id= "obj_{{ group.id }}">
                         <label for="{{ group.id }}" id="gid_{{ group.id }}" class="control-label">{{ group.id }}</label>.)
                         <label for="{{ group.id }}" id="gname_{{ group.id }}" class="control-label">{{ group.groupname }}</label> - 
                         <label for="{{ group.id }}" id="glead_{{ group.id }}" class="control-label">{{ group.leader }}</label>

@@ -13,6 +13,8 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 //define global variables//
 var class_list = [];
 var cur_class;
+var pref_set = false;
+var upload_data;
 
 // define object constructors
 //function newClass(classname, start, end, gender, score, stud_pref, lead_pref) {
@@ -37,9 +39,11 @@ function Student(name, gender, score, first, second, third) {
     this.third = third;
 }
 
-function Group(groupname, stud_leader, number_id) {
+function Group(groupname, stud_leader, prefs, number_id) {
   this.groupname = groupname;
   this.leader = stud_leader;
+  this.preferences = [];
+  this.preferences = prefs;
   this.id = number_id;
 }
 
@@ -79,6 +83,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/create', function (req, res) {
+    pref_set = false;
     res.render('new_class_form_1', { 
         title: 'Sort New Class',
         heading: 'Class Settings',
@@ -103,19 +108,29 @@ app.get('/upload', function (req, res) {
 
 
 app.post('/upload', function (req, res) {
-    if (req.body.student) addStudent(req);
-    else if (req.body.group) addGroupList(req);
-    res.contentType('application/json');
-    var site = JSON.stringify('/class');//add stud_data content to .get/upload
-    res.header('Content-Length', site.length);
-    res.send(site);
+    if (req.body.student) {
+        addStudent(req);
+        res.send(true);
+    }
+    else if (req.body.group) {
+        addGroupList(req);
+        res.send(true);
+    }
+    else { 
+        res.contentType('application/json');
+        var site = JSON.stringify('/class');//add stud_data content to .get/upload
+        res.header('Content-Length', site.length);
+        res.send(site);
+    }
 });
 
 app.get('/class', function (req, res) {
-    addDummyData();
+    //addDummyData();
+    if (!pref_set) convertStudentPreferences();
     res.render('class_tpl', { 
         title: 'Sort Students',
-        class_data: cur_class 
+        class_data: cur_class,
+        class_site: true 
     });
 });
 
@@ -148,23 +163,46 @@ function addClassName(req) {
 
 function addStudent(req) {
     var data = req.body;
-    var new_student = new Student(data.name, data.gender, 
-        data.score, data.first, data.second, data.third);
-    console.log("adding student: " + new_student.name);     
-    cur_class.classlist[cur_class.classlist.length] = new_student;
-
+    if (data.name) 
+    {
+        var new_student = new Student(data.name, data.gender, 
+            data.score, data.first, data.second, data.third);
+        cur_class.classlist[cur_class.classlist.length] = new_student;
+    }
 }
 
 function addGroupList(req) {
     var data = req.body;
-    var new_group = new Group(data.groupname, data.id, cur_class.grouplist.length);    
-    console.log("adding group: " + new_group.groupname); 
-    cur_class.grouplist[cur_class.grouplist.length] = new_group;
+    if (data.groupname) 
+    {
+        var new_group = new Group(data.groupname, data.leader, data.prefs, cur_class.grouplist.length);    
+        cur_class.grouplist[cur_class.grouplist.length] = new_group;
+    }
+}
+
+function convertStudentPreferences() {
+    for (var i = 0; i < cur_class.classlist.length; ++i) 
+    {
+        cur_class.classlist[i].first = getGroupID(cur_class.classlist[i].first);
+        cur_class.classlist[i].second = getGroupID(cur_class.classlist[i].second);
+        cur_class.classlist[i].third = getGroupID(cur_class.classlist[i].third);
+    }
+    pref_set = true;
+}
+
+function getGroupID(name) {
+    for (var i = 0; i < cur_class.grouplist.length; ++i) 
+    {
+        if (name == cur_class.grouplist[i].groupname) {
+            return cur_class.grouplist[i].id;
+        } 
+    }
 }
 
 function addDummyData() {
+    //function newClass(classname, gender, score, stud_pref, lead_pref)
     cur_class = new newClass('EECS481', true, true, true, false);
-    for (var i = 0; i < 6; ++i) //add groups
+    for (var i = 0; i < 5; ++i) //add groups
     {
         var rand_groupname = 'g_' + Math.random().toString(36).substr(2, 5);
         var rand_leader = 'l_' + Math.random().toString(36).substr(2, 5);
@@ -176,12 +214,13 @@ function addDummyData() {
         var rand_uniq = 's_' + Math.random().toString(36).substr(2, 5);
         //var rand_gender = undefined;
         var rand_gender = Math.floor(Math.random() * (2 - 0)); //random generate 0 or 1
-        if (rand_gender) rand_gender = "M";
-        else rand_gender = "F";
+        var f_cut = Math.floor(Math.random() * (2 - 0)); //random generate 0 or 1
+        if (rand_gender && f_cut) rand_gender = "F";
+        else rand_gender = "M";
         var rand_score = Math.floor(Math.random() * (21 - 0)); //random number [0,20]
-        var rand_first = Math.floor(Math.random() * (6 - 0)); //random number [0,16]
-        var rand_second = Math.floor(Math.random() * (6 - 0)); //random number [0,16]
-        var rand_third = Math.floor(Math.random() * (6 - 0)); //random number [0,16]
+        var rand_first = Math.floor(Math.random() * (5 - 0)); //random number [0,16]
+        var rand_second = Math.floor(Math.random() * (5 - 0)); //random number [0,16]
+        var rand_third = Math.floor(Math.random() * (5 - 0)); //random number [0,16]
         var new_student = new Student(rand_uniq, rand_gender, 
         rand_score, rand_first, rand_second, rand_third);
         cur_class.classlist[cur_class.classlist.length] = new_student;

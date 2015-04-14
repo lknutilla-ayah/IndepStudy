@@ -1,12 +1,26 @@
 //global variables
     var group_max, group_min;
     var nd_chk, rd_chk;//sort from 2nd choices, sort from 3rd choices
+    var lock_fems = false, lock_pres = false, lock_prefs = false;
 
 $(document).ready( function() {
     $( "ul.droptrue" ).sortable({
-      connectWith: "ul"
+        connectWith: "ul",
+        cancel: ".ui-state-disabled",
+        update: function(event, ui) {
+            if (ui.sender != null)
+            {
+                var old_grp = document.getElementById(ui.sender.attr('id'));
+                var new_grp = document.getElementById(ui.item.parent().attr('id'));
+                var student = document.getElementById(ui.item.attr('id'));
+                if (old_grp.id != "sortable_class") updateCount(old_grp);
+                if (new_grp.id != "sortable_class") updateCount(new_grp);
+                changeColor(student);
+            }
+        }
     });
     $( "#sortable_class" ).disableSelection();
+
     $("#grp_range").ionRangeSlider({
         type: "double",
         min: 0,
@@ -26,47 +40,117 @@ $(document).ready( function() {
     rd_chk = document.getElementById("3rd");
 })
 
+
+/*----CLASS LIST FUNCTIONS----*/
+
 $( "#sort_frst" ).click(function() {
-    var students = document.getElementsByClassName("student");
+    //var students = document.getElementsByClassName("student");
+    var students = $("#sortable_class").children('li');
     for (var i = students.length-1; i>=0; --i)
     {
-        var first = document.getElementById("first_" + students[i].id).innerHTML;
-        var second = document.getElementById("second_" + students[i].id).innerHTML;
-        var third = document.getElementById("third_" + students[i].id).innerHTML;
-        var top_choice;
-        if (document.getElementById(first)) {
-            students[i].style.backgroundColor = "white";
-            top_choice = first;
-        }
-        else if (document.getElementById(second)) {
-            students[i].style.backgroundColor = "#D6E0FF";
-            top_choice = second;
-        }
-        else if (document.getElementById(third)) {
-            students[i].style.backgroundColor = "#FFE0C2";
-            top_choice = third;
-        }
-        else //move into unknown/later placables/unsorted bucket 
-        {}
-        var li_stud = document.getElementById(students[i].id);
-        var ul_group = document.getElementById(top_choice);
-        ul_group.appendChild(li_stud);
-        updateCount(ul_group);
+        if ($(students[i]).hasClass("ui-state-disabled")) continue;
+        addStudentFromList(students[i]);
     }
+});
+$( "#srt_rand" ).click(function() {
+    var students = document.getElementsByClassName("student");
+    students = [].slice.call(students,0);
+    var doc_groups = document.getElementsByClassName("group_mems");
+    var srt_class = document.getElementById("sortable_class");
+    var num_students = students.length;
+    var min = group_min;
+    //clear group counts
+    for (var i = 0; i < doc_groups.length; ++i)
+    {
+        var members = $(doc_groups[i]).children('li');
+        for (var j = members.length-1; j >= 0; --j) 
+        {
+            addMember(members[j],srt_class,doc_groups[i]);
+        }
+    }
+    while (num_students > 0 && min <= group_max) {
+        for (var i = 0; i < doc_groups.length; ++i)
+        {
+            var grp_sz = document.getElementById("gcount_"+doc_groups[i].id).value;
+            while (grp_sz < min && num_students > 0) 
+            {
+                var rand_student = Math.floor(Math.random() * (num_students - 0));
+                var student = students[rand_student];
+                addMember(student, doc_groups[i], srt_class);
+                students.splice(rand_student,1);
+                grp_sz = document.getElementById("gcount_"+doc_groups[i].id).value;
+                --num_students;
+            }   
+        }
+        ++min;
+    }
+});
+
+$( "#srt_non" ).click(function() {
+    var srt_class = document.getElementById("sortable_class");
+    var doc_groups = document.getElementsByClassName("group_mems");
+    var min = group_min;
+    var max = group_max;
+    var no_pref_cnt = $("#sortable_class").children('li').length;
+    while (no_pref_cnt > 0 && min <= max) {
+        var no_pref = $("#sortable_class").children('li');
+        for (var i = no_pref.length-1; i >= 0; --i) 
+        {
+            for (var j = 0; j < doc_groups.length; ++j)
+            {
+                var grp_sz = document.getElementById("gcount_"+doc_groups[j].id).value;
+                if (grp_sz < min) {
+                    addMember(no_pref[i], doc_groups[j], srt_class);
+                    --no_pref_cnt;
+                    break;
+                }
+            }
+        }
+        ++min;
+    }
+    if (no_pref_cnt > 0) {
+        alert("Group size must be increased in order to sort all students");
+    }    
 });
 
 $( "#srt_fem" ).click(function() {
     var students = document.getElementsByClassName("student");
-    var num_fem = document.getElementById(num_fem).value;
-    for (var i = students.length-1; i>=0; --i)
+    //var num_fem = document.getElementById("num_fem").value;
+    var f_lst = []; //list of female students
+    for (var i = 0; i < students.length; ++i)
     {
-        var gender = document.getElementById("gender_" + student.id).innerHTML;
-        if (gender === "F") //need to format F/M
-        {
-            
-        }
+        var gender = document.getElementById("gender_" + students[i].id).innerHTML;
+        if (gender === "F") f_lst[f_lst.length] = students[i];
+    }
+    for (var j = f_lst.length-1; j>=0; --j)
+    {
+        if ($(f_lst[j]).hasClass("ui-state-disabled")) continue;
+        addStudentFromList(f_lst[j]);
     }
 });
+
+function addStudentFromList(student) {
+    var first = document.getElementById("first_" + student.id).innerHTML;
+    var second = document.getElementById("second_" + student.id).innerHTML;
+    var third = document.getElementById("third_" + student.id).innerHTML;
+    if (set_gender) var gender = document.getElementById("gender_" + student.id).innerHTML;
+    var top_choice;
+    // if (set_gender && gender === "F") student.style.backgroundColor = "#FFE5FF";
+    // else student.style.backgroundColor = "white";
+
+    if (document.getElementById(first)) top_choice = first;
+    else if (document.getElementById(second)) top_choice = second;
+    else if (document.getElementById(third)) top_choice = third;
+    else return;//leave in class list 
+    //var li_stud = document.getElementById(student.id);
+    var ul_group = document.getElementById(top_choice);
+    //ul_group.appendChild(li_stud);
+    ul_group.appendChild(student);
+    changeColor(student);
+    updateCount(ul_group);
+}
+
+/*----GROUP SORT FUNCTIONS----*/
 
 $( "#ordr_scr" ).click(function() {
     var doc_groups = document.getElementsByClassName("group_mems");
@@ -83,7 +167,6 @@ $( "#ordr_scr" ).click(function() {
             b = parseInt(document.getElementById("score_" + b.id).innerHTML);
             return a > b;
         })
-        console.log(group.id);
         for (var j = 0; j < members.length; ++j)
         {
             var score = document.getElementById("score_" + members[j].id).innerHTML;
@@ -103,6 +186,7 @@ $( ".delete_grp" ).click(function() {
     var class_lst = document.getElementById("sortable_class");
     for (var i = 0; i < members.length; ++i)
     {
+        members[i].style.backgroundColor = "white";
         class_lst.appendChild(members[i]);
     }
     var group_obj = document.getElementById("obj_" + group.id);
@@ -123,27 +207,31 @@ $( ".remove_mem" ).click(function() {
             alert("Group " + group.id + " is smaller than the min group size ("+ group_min +")");
             break;
         }
+        if ($(members[i]).hasClass("ui-state-disabled")) continue;
         var first = document.getElementById("first_" + members[i].id).innerHTML;
         var second = document.getElementById("second_" + members[i].id).innerHTML;
         var third = document.getElementById("third_" + members[i].id).innerHTML;
-        if (document.getElementById("gcount_"+first).value < group_max && 
+        if (document.getElementById("gcount_"+first) && 
+            document.getElementById("gcount_"+first).value < group_max && 
             first != group.id) {
             first = document.getElementById(first);
-            members[i].style.backgroundColor = "white";
+            //members[i].style.backgroundColor = "white";
             addMember(members[i], first, group);
             return;
         }
-        else if (document.getElementById("gcount_"+second).value < group_max && 
+        else if (document.getElementById("gcount_"+second) && 
+            document.getElementById("gcount_"+second).value < group_max && 
             nd_chk.checked && second != group.id) {
             second = document.getElementById(second);
-            members[i].style.backgroundColor = "#D6E0FF";
+            //members[i].style.backgroundColor = "#D6E0FF";
             addMember(members[i], second, group);
             return;
         }
-        else if (document.getElementById("gcount_"+third).value < group_max && 
+        else if (document.getElementById("gcount_"+third) &&
+            document.getElementById("gcount_"+third).value < group_max && 
             rd_chk.checked && third != group.id) {
             third = document.getElementById(third);
-            members[i].style.backgroundColor = "#FFE0C2";
+            //members[i].style.backgroundColor = "#FFFFC2";
             addMember(members[i], third, group);
             return;
         }
@@ -163,31 +251,30 @@ $( ".add_mem" ).click(function() {
     for (var i = 0; i < doc_groups.length; ++i)
     {
         if (doc_groups[i].id === group.id) continue;
-        members = [];
-        $(doc_groups[i]).find('li').each(function(){
-            members[members.length] = this;
-        });
+        //members = [];
+        members = $(doc_groups[i]).children('li');
+        // $(doc_groups[i]).find('li').each(function(){
+        //     members[members.length] = this;
+        // });
         for (var j = 0; j < members.length; ++j) //members[i] is student
         {
             if (members.length <= group_min) break;
+            if ($(members[j]).hasClass("ui-state-disabled")) continue;
             var first = document.getElementById("first_" + members[j].id).innerHTML;
             var second = document.getElementById("second_" + members[j].id).innerHTML;
             var third = document.getElementById("third_" + members[j].id).innerHTML;
             if (first === group.id) {
                 first = document.getElementById(first);
-                members[j].style.backgroundColor = "white";
                 addMember(members[j], first, doc_groups[i]);
                 return;
             }
             else if (second === group.id && nd_chk.checked) {
                 second = document.getElementById(second);//ul
-                members[j].style.backgroundColor = "#D6E0FF";
                 addMember(members[j], second, doc_groups[i]);
                 return;
             }
             else if (third === group.id && rd_chk.checked) {
                 third = document.getElementById(third);//ul
-                members[j].style.backgroundColor = "#FFE0C2";
                 addMember(members[j], third, doc_groups[i]);
                 return;
             }
@@ -198,33 +285,44 @@ $( ".add_mem" ).click(function() {
 
 function addMember(student, new_grp, old_grp) {
     new_grp.appendChild(student);
-    updateCount(new_grp);
-    updateCount(old_grp);
+    if (old_grp.id != "sortable_class") updateCount(old_grp);
+    if (new_grp.id != "sortable_class") updateCount(new_grp);
+    changeColor(student);
 }
+
+/*----HELPER FUNCTIONS----*/
 
 function updateCount(group) {
     document.getElementById("gcount_"+group.id).value = $(group).children('li').length;
 }
 
-
-    // var doc_groups = document.getElementsByClassName("group_mems");
-    // for (var i = 0; i < doc_groups.length; ++i)
-    // {
-    //     var name = document.getElementById("gname_" + doc_groups[i].id).innerHTML;
-    //     var lead = document.getElementById("glead_" + doc_groups[i].id).innerHTML;
-    //     var id = doc_groups[i].id;
-    //     groups[doc_groups[i].id] = new Group(name, lead, id);
-    // }
-    // for (var i = 0; i < students.length; ++i)
-    // {
-    //     var name = document.getElementById("name_" + students[i].id).innerHTML;
-    //     var gender = document.getElementById("gender_" + students[i].id).innerHTML;
-    //     var score = document.getElementById("score_" + students[i].id).innerHTML;
-    //     var first = document.getElementById("first_" + students[i].id).innerHTML;
-    //     var second = document.getElementById("second_" + students[i].id).innerHTML;
-    //     var third = document.getElementById("third_" + students[i].id).innerHTML;
-    //     var student = new Student(name,gender,score,first,second,third);
-    //     var li_stud = document.getElementById(students[i].id);
-    //     var ul_group = document.getElementById(first);
-    //     ul_group.appendChild(li_stud);
-    // }
+function changeColor(student) {
+    var group = student.parentNode.id;
+    var first = document.getElementById("first_" + student.id);
+    var second = document.getElementById("second_" + student.id);
+    var third = document.getElementById("third_" + student.id);
+    if (set_gender) var gender = document.getElementById("gender_" + student.id).innerHTML;
+    if (set_gender && gender == "F") {
+        student.style.backgroundColor = "#FFF2FF";
+    }
+    if (first.innerHTML === group) {
+        first.style.color = "#00CC99";
+        second.style.color = "black";
+        third.style.color = "black";
+    }
+    else if (second.innerHTML === group) {
+        second.style.color = "#FFC266";
+        first.style.color = "black";
+        third.style.color = "black";
+    }
+    else if (third.innerHTML === group) {
+        third.style.color = "#A30000";
+        second.style.color = "black";
+        first.style.color = "black";
+    }
+    else {
+        first.style.color = "black";
+        second.style.color = "black";
+        third.style.color = "black";
+    }
+}

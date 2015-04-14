@@ -5,22 +5,45 @@
   var score = "{{ class_obj.score }}";
   var stud_pref = "{{ class_obj.stud_pref }}";
   var lead_pref = "{{ class_obj.lead_pref }}";
+  var upload_data = "{{ upload_data }}";
 </script>
 <form class="form-horizontal" enctype="multipart/form-data">
-  <h5>Paste Class Data: </h5>
   <div class="form-group">
-    <div id = "students_enter">
+    <div class="panel panel-info">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><h5>Paste Class Data</h5></div>
+      <div class="panel-body">
+        <p>You can copy/paste into the table from any spreadsheet, or manually type entries. Please note that this product is in beta, and currently doesn't perform any validations. Therefore, it is important to ensure that: 1) GENDER is either M/F, 2) SCORE is a valid number, and 3) PREFERENCES exactly match group names.</p>
+      </div>
+      <!-- Table -->
+      <div id = "students_enter">
+      </div>
     </div>
   </div>
-  <h5>Paste Group Names: </h5>
-  <div class="form-group">
-    <div id = "groups_enter">
+  <div class="form-group" id="grp_data">
+    <div class="panel panel-info">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><h5>Paste Group Data</h5></div>
+        <div class="panel-body">
+          <p>You can copy/paste into the table from any spreadsheet, or manually type entries. Please note that this product is in beta, and currently doesn't perform any validations. Therefore, it is important to ensure that: 1) GROUP NAMES exactly match the STUDENT PREFERENCES in the class data, 2) PROPOSAL PRESENTERS are included in the class data and exactly match their uniquenames in the class data, and 3) TEAMMATE PREFERENCES exactly match student uniquenames in the class data.</p>
+          {% if class_obj.lead_pref %} 
+          <h4 class="col-md-offset-8">Add/Remove Teammate Preference</h4>
+          <div class="col-md-offset-10 btn-group" id="add_sub_pref">
+            <button id="add_pref" type="button" class="btn btn-default"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+            <button id="sub_pref" type="button" class="btn btn-default"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+          </div>
+          {% endif %}
+        </div>
+        <div id = "groups_enter">
+        </div>
     </div>
-  </div>  
+  </div> 
   <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
-       <button id = "submit" type="submit" class="btn btn-default">Submit</button>
+    <div class="col-md-10">
+      <button id = "upload" type="button" class="btn btn-default">Upload</button>
     </div>
   </div>
 </form>
 {% endblock %}
+
+

@@ -22,10 +22,37 @@ body {
     display: block;
 }
 
+#sortable_class {
+    min-height: 50px;
+    padding-bottom: 50px;
+}
+
 .group_mems {
     list-style-type: none;
-    padding: 0;
-    padding-top: 5px;
+    padding: 5px 0 50px 0;
     min-height: 100px;
 }
+
+.icon-btn {
+    vertical-align: middle; 
+    /*padding-bottom: 10px;*/
+}
+
+.icon {
+    margin: 5px 0 0 2px;
+}
+
+.btn:focus {
+  outline: none;
+}
+
+.btn.disabled {
+    pointer-events: auto;
+}
+
+tr.top td { border-top: thin solid #ddd; }
+tr.bottom td { border-bottom: thin solid #ddd; }
+td.left { border-left: thin solid #ddd; }
+td.right { border-right: thin solid #ddd; }
+
 

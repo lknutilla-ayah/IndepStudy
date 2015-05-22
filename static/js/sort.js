@@ -38,6 +38,7 @@ $(document).ready( function() {
     });
     nd_chk = document.getElementById("2nd");
     rd_chk = document.getElementById("3rd");
+
 })
 
 
@@ -51,6 +52,7 @@ $( "#sort_frst" ).click(function() {
         if ($(students[i]).hasClass("ui-state-disabled")) continue;
         addStudentFromList(students[i]);
     }
+    $("#ordr_scr").trigger("click");
 });
 $( "#srt_rand" ).click(function() {
     var students = document.getElementsByClassName("student");

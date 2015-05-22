@@ -76,13 +76,13 @@ swig.setDefaults({ cache: false });
 // NOTE: You should always cache templates in a production environment.
 // Don't leave both of these to `false` in production!
 
-app.get('/', function (req, res) {
-  res.render('index', { 
-        title: 'Home',
-    });
-});
+// app.get('/', function (req, res) {
+//   res.render('index', { 
+//         title: 'Home',
+//     });
+// });
 
-app.get('/create', function (req, res) {
+app.get('/', function (req, res) {
     pref_set = false;
     res.render('new_class_form_1', { 
         title: 'Sort New Class',
@@ -92,7 +92,7 @@ app.get('/create', function (req, res) {
 });
 
 
-app.post('/create', function (req, res) {
+app.post('/', function (req, res) {
     var new_class = addClassName(req);
     res.redirect("/upload");
 });
@@ -127,6 +127,15 @@ app.post('/upload', function (req, res) {
 app.get('/class', function (req, res) {
     //addDummyData();
     if (!pref_set) convertStudentPreferences();
+    res.render('class_tpl', { 
+        title: 'Sort Students',
+        class_data: cur_class,
+        class_site: true 
+    });
+});
+
+app.get('/tutorial', function (req, res) {
+    addDummyData();
     res.render('class_tpl', { 
         title: 'Sort Students',
         class_data: cur_class,
@@ -201,18 +210,19 @@ function getGroupID(name) {
 
 function addDummyData() {
     //function newClass(classname, gender, score, stud_pref, lead_pref)
-    cur_class = new newClass('EECS481', true, true, true, false);
-    for (var i = 0; i < 5; ++i) //add groups
+    cur_class = new newClass('Example Class', true, true, true, true);
+    var group_names = ["Group 0", "Group 1", "Group 2", "Group 3", "Group 4"];
+    var pres_uniqs = ["lead0","lead1","lead2","lead3","lead4"];
+    var prefs = [["stud1","stud2"],[],[],["stud3"],[]];
+    var student_uniqs = ["lead0","lead1","lead2","lead3","lead4","stud1","stud2",
+    "stud3","stud4","stud5","stud6","stud7","stud8","stud9","stud10"];
+    for (var i = 0; i < group_names.length; ++i) //add groups
     {
-        var rand_groupname = 'g_' + Math.random().toString(36).substr(2, 5);
-        var rand_leader = 'l_' + Math.random().toString(36).substr(2, 5);
-        var new_group = new Group(rand_groupname, rand_leader, i);
+        var new_group = new Group(group_names[i], pres_uniqs[i], prefs[i], i);
         cur_class.grouplist[cur_class.grouplist.length] = new_group;
     }
-    for (var i = 0; i < 10; ++i) //add students
+    for (var i = 0; i < student_uniqs.length; ++i) //add students
     {
-        var rand_uniq = 's_' + Math.random().toString(36).substr(2, 5);
-        //var rand_gender = undefined;
         var rand_gender = Math.floor(Math.random() * (2 - 0)); //random generate 0 or 1
         var f_cut = Math.floor(Math.random() * (2 - 0)); //random generate 0 or 1
         if (rand_gender && f_cut) rand_gender = "F";
@@ -220,11 +230,21 @@ function addDummyData() {
         var rand_score = Math.floor(Math.random() * (21 - 0)); //random number [0,20]
         var rand_first = Math.floor(Math.random() * (5 - 0)); //random number [0,16]
         var rand_second = Math.floor(Math.random() * (5 - 0)); //random number [0,16]
+        while (rand_second == rand_first) {
+            rand_second = Math.floor(Math.random() * (5 - 0));
+        }
         var rand_third = Math.floor(Math.random() * (5 - 0)); //random number [0,16]
-        var new_student = new Student(rand_uniq, rand_gender, 
+        while (rand_third == rand_second || rand_third == rand_first ) {
+            rand_third = Math.floor(Math.random() * (5 - 0));
+        }
+        var new_student = new Student(student_uniqs[i], rand_gender, 
         rand_score, rand_first, rand_second, rand_third);
         cur_class.classlist[cur_class.classlist.length] = new_student;
     }
+    cur_class.classlist[cur_class.classlist.length] = new Student("stud11", "F", 
+        0);
+    cur_class.classlist[cur_class.classlist.length] = new Student("stud12", "M", 
+        15);
 }
 
 

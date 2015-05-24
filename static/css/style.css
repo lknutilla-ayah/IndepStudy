@@ -1,5 +1,6 @@
 body {
     padding-top: 1%;
+    position: relative;
 }
 
 .btn-file {

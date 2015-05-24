@@ -12,20 +12,18 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 //define global variables//
 var class_list = [];
-var cur_class;
+var cur_class = new newClass();
 var pref_set = false;
 var upload_data;
 
 // define object constructors
 //function newClass(classname, start, end, gender, score, stud_pref, lead_pref) {
-function newClass(classname, gender, score, stud_pref, lead_pref) {
-    this.classname = classname;
-    this.gender = gender;
-    this.score = score;
-    //this.startDate = start;
-    //this.endDate = end;
-    this.stud_pref = stud_pref;
-    this.lead_pref = lead_pref;
+function newClass() {
+    this.classname = '';
+    this.gender = false;
+    this.score = false;
+    this.stud_pref = true;
+    this.lead_pref = false;
     this.classlist = [];
     this.grouplist = [];
 }
@@ -83,56 +81,74 @@ swig.setDefaults({ cache: false });
 // });
 
 app.get('/', function (req, res) {
-    pref_set = false;
-    res.render('new_class_form_1', { 
-        title: 'Sort New Class',
-        heading: 'Class Settings',
-        date: true
+    res.render('index', { 
+        title: 'Login',
+        heading: 'Login',
+        password: 'password4eecs'
     });
 });
 
-
-app.post('/', function (req, res) {
-    var new_class = addClassName(req);
-    res.redirect("/upload");
-});
-
-app.get('/upload', function (req, res) {
-    res.render('new_class_form_2', { 
-        title: 'Sort New Class',
-        heading: 'Enter Class Data for ' + cur_class.classname,
+app.get('/sortinghat', function (req, res) {
+    res.render('new_class_tpl', { 
+        title: 'Create New Class',
         class_obj: cur_class,
-        files: true
     });
 });
 
-
-app.post('/upload', function (req, res) {
-    if (req.body.student) {
-        addStudent(req);
-        res.send(true);
-    }
-    else if (req.body.group) {
-        addGroupList(req);
-        res.send(true);
-    }
-    else { 
-        res.contentType('application/json');
-        var site = JSON.stringify('/class');//add stud_data content to .get/upload
-        res.header('Content-Length', site.length);
-        res.send(site);
-    }
+app.post('/sortinghat', function (req, res) {
+    updateSettings(req);
 });
 
-app.get('/class', function (req, res) {
-    //addDummyData();
-    if (!pref_set) convertStudentPreferences();
-    res.render('class_tpl', { 
-        title: 'Sort Students',
-        class_data: cur_class,
-        class_site: true 
-    });
-});
+// app.get('/', function (req, res) {
+//     pref_set = false;
+//     res.render('new_class_form_1', { 
+//         title: 'Sort New Class',
+//         heading: 'Class Settings',
+//         date: true
+//     });
+// });
+
+// app.post('/', function (req, res) {
+//     var new_class = addClassName(req);
+//     res.redirect("/upload");
+// });
+
+// app.get('/upload', function (req, res) {
+//     res.render('new_class_form_2', { 
+//         title: 'Sort New Class',
+//         heading: 'Enter Class Data for ' + cur_class.classname,
+//         class_obj: cur_class,
+//         files: true
+//     });
+// });
+
+
+// app.post('/upload', function (req, res) {
+//     if (req.body.student) {
+//         addStudent(req);
+//         res.send(true);
+//     }
+//     else if (req.body.group) {
+//         addGroupList(req);
+//         res.send(true);
+//     }
+//     else { 
+//         res.contentType('application/json');
+//         var site = JSON.stringify('/class');//add stud_data content to .get/upload
+//         res.header('Content-Length', site.length);
+//         res.send(site);
+//     }
+// });
+
+// app.get('/class', function (req, res) {
+//     //addDummyData();
+//     if (!pref_set) convertStudentPreferences();
+//     res.render('class_tpl', { 
+//         title: 'Sort Students',
+//         class_data: cur_class,
+//         class_site: true 
+//     });
+// });
 
 app.get('/tutorial', function (req, res) {
     addDummyData();
@@ -154,6 +170,23 @@ function startListen() {
     http.listen(port, function() {
     console.log('listening on *:' + port);
     });
+}
+
+function updateSettings(req) {
+    console.log(cur_class.gender);
+    cur_class.classname = req.body.classname;
+    //req.params.name = name;
+    //var startDate = req.body.startDate;
+    //var endDate = req.body.endDate;
+    cur_class.gender = req.body.gender;
+    cur_class.score = req.body.survey;
+    cur_class.stud_pref = req.body.stud_pref;
+    cur_class.lead_pref = req.body.lead_pref;
+    console.log(cur_class.gender);
+    console.log(cur_class.classname);
+    //cur_class = new newClass(name, startDate, endDate, gender, score, stud_pref, lead_pref);
+    // cur_class = new newClass(name, gender, score, stud_pref, lead_pref);
+    // class_list[class_list.length] = cur_class;
 }
 
 function addClassName(req) {
@@ -210,7 +243,10 @@ function getGroupID(name) {
 
 function addDummyData() {
     //function newClass(classname, gender, score, stud_pref, lead_pref)
-    cur_class = new newClass('Example Class', true, true, true, true);
+    cur_class.gender = true;
+    cur_class.score = true;
+    cur_class.stud_pref = true;
+    cur_class.lead_pref = true;
     var group_names = ["Group 0", "Group 1", "Group 2", "Group 3", "Group 4"];
     var pres_uniqs = ["lead0","lead1","lead2","lead3","lead4"];
     var prefs = [["stud1","stud2"],[],[],["stud3"],[]];

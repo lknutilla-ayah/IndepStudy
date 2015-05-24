@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="css/style.css">
     {% block head %}
   </head>
-  <body>
+  <body data-spy="scroll" data-target="#sort-hat-navigation">
   {{ header|safe }}
   {% block inner %}
   {% endblock %}
@@ -21,15 +21,16 @@
   <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
   <!--{% if date %}<script src="js/dates.js"></script>{% endif %}-->
-  {% if files %}
   <script src="js/handsontable.full.min.js"></script>
-  <script src="js/files.js"></script>
-  {% endif %}
-  {% if class_site %}
+  <script src="js/data_enter.js"></script>
+  <script src="js/student_data_enter.js"></script>
+  <script src="js/group_data_enter.js"></script>
   <script src="js/sort.js"></script>
   <script src="js/locks.js"></script>
   <script src="ion-slider/js/ion-rangeSlider/ion.rangeSlider.min.js"></script>
-  {% endif %}
+  <script type="text/javascript">
+    $('body').scrollspy({ target: '#sort-hat-navigation' })
+  </script>
   {% endblock %}
   </body>
 </html>

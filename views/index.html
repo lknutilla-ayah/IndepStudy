@@ -6,10 +6,20 @@
     <link rel="stylesheet" href="/bootstrap/css/bootstrap-switch.min.css" >
   </head>
   <body>
-    {{ header|safe }}
+  <script>
+    var password = "{{ password }}";
+  </script>
     <div class="container">
       <div class="jumbotron">
-        Welcome to the Group Sorting Hat!
+        <h2>Welcome to the Group Sorting Hat!</h2>
+        <p id="incorrect"></p>
+        <form class="navbar-form navbar-left" role="login">
+          <div class="form-group" id="pass_form">
+            <label for="enter_password">Password</label>
+            <input type="password" class="form-control" id="enter_password" placeholder="Password">
+          </div>
+          <button type="submit" class="btn btn-default" id="login">Login</button>
+        </form>
       </div>
     </div>
 
@@ -17,6 +27,6 @@
   <script src="jquery-1.11.2.min.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
   <script src="bootstrap/js/bootstrap-switch.min.js"></script>
-  <script src="js/client.js"></script>
+  <script src="js/login.js"></script>
   </body>
 </html>

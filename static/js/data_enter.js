@@ -7,97 +7,15 @@ var
 
 var num_pref = 1;
 
+var set_gender = $('#gender').prop("checked");
+var set_score = $('#score').prop("checked");
+var stud_pref = $('#stud_pref').prop("checked");
+var lead_pref = $('#lead_pref').prop("checked");
+
 stud_container.style.width = '100%';
 stud_container.style.overflow = "scroll";
 group_container.style.width = '100%';
 group_container.style.overflow = "scroll";
-
-function createCols() {
-  cols = [{data: 'uniqname'}];
-  colH = ['UNIQNAME'];
-  if (gender === "on") {
-    cols[cols.length] = {data: 'gender'};
-    colH[colH.length] = 'GENDER (M/F)';
-  }
-  if (score === "on") {
-    cols[cols.length] = {data: 'score'};
-    colH[colH.length] = 'SCORE';
-  } 
-  if (stud_pref === "on") {
-    cols[cols.length] = {data: 'first'};
-    colH[colH.length] = 'FIRST PREFERENCE';
-    cols[cols.length] = {data: 'second'};
-    colH[colH.length] = 'SECOND PREFERENCE';
-    cols[cols.length] = {data: 'third'};
-    colH[colH.length] = 'THIRD PREFERENCE';
-  }
-};
-createCols();
-
-function getData() {
-  if (upload_data) {
-    //var class_data = JSON.parse(res.response);
-    console.log(upload_data);
-    // student_HT.loadData(class_data);
-    console.log("ghere");
-    // group_data = JSON.parse(group_data);
-    // group_HT.loadData(group_data);
-  }
-}
-getData();
-
-  // dat_data = JSON.parse(dat_data);
-  // student_HT.loadData(dat_data.data);
-
-student_HT = new Handsontable(stud_container, {
-  data: [],
-  dataSchema: {uniqname: null, gender: null, score: null},
-  colHeaders: colH,
-  columns: cols,
-  stretchH: 'all',
-  minSpareRows: 1,
-  contextMenu: true
-});
-
-function createGCols() {
-    gcols = [{data: 'groupname'}, {data: 'leader'}];
-    gcolH = ['GROUP NAME', 'PROPORSAL PRESENTER'];
-    if (lead_pref === "on") {
-      var pref = 'preference_'+ num_pref; 
-      var pref_team = 'PREFERRED TEAMMATE '+ num_pref; ++num_pref;
-      gcols[gcols.length] = {data: pref};
-      gcolH[gcolH.length] = pref_team;
-    }
-};
-createGCols();
-
-$("#add_pref").click(function(){
-  var pref = 'preference_'+ num_pref; 
-  var pref_team = 'PREFERRED TEAMMATE '+ num_pref; ++num_pref;
-  gcols[gcols.length] = {data: pref};
-  gcolH[gcolH.length] = pref_team;
-  group_HT.updateSettings({columns: gcols});
-  group_HT.updateSettings({colHeaders: gcolH});
-  group_HT.render();
-});
-
-$("#sub_pref").click(function(){
-  gcols.splice(gcols.length-1, 1);
-  gcolH.splice(gcolH.length-1, 1); --num_pref;
-  group_HT.updateSettings({columns: gcols});
-  group_HT.updateSettings({colHeaders: gcolH});
-  group_HT.render();
-});
-
-group_HT = new Handsontable(group_container, {
-  data: [],
-  dataSchema: {groupname: null, uniqname: null},
-  colHeaders: gcolH,
-  columns: gcols,
-  stretchH: 'all',
-  minSpareRows: 1,
-  contextMenu: true
-});
 
 $('#upload').click(function() {
   var s_row_cnt = student_HT.countRows();

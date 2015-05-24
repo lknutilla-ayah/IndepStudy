@@ -1,23 +1,24 @@
   <header>
     <div class="container-fluid">
-      <nav class="navbar navbar-default">
+      <nav class="navbar navbar-default navbar-fixed-top">
         <!--<div class="container-fluid">-->
-          <div class="navbar-header">
+          <div class="navbar-header" id="sort-hat-navigation">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
               <span class="sr-only">Toggle navigation</span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">Team Sorting Hat</a>
+            <a class="navbar-brand" href="/sortinghat">Team Sorting Hat</a>
           </div>
-          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <div class="collapse navbar-collapse" id="sort-hat-nav">
+            <ul class="nav navbar-nav navbar-left nav-tabs" role="tablist">
+              <li role="presentation" class="active"><a href="/sortinghat#settings">Settings</a></li>
+              <li role="presentation"><a href="/sortinghat#data-entry">Data Entry</a></li>
+              <li role="presentation"><a href="/sortinghat#class-sort">Class Sort</a></li>
+            </ul>
             <ul class="nav navbar-nav navbar-right">
               <li><a href="/tutorial">Example Class</a></li>
-              <!--<li><a href="/create">New Survey</a></li>
-              <li><a href="/classes">View Entries</a></li>
-              <li><a href="#">Make Teams</a></li>-->
-              
             </ul>
           </div>
         <!--</div>-->

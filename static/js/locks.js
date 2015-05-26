@@ -1,65 +1,69 @@
 /*----LOCK FUNCTIONS----*/
 
-$('.lock').click(function() {
-    var student = this.parentNode;
-    if (!$(student).hasClass("ui-state-disabled")) lockThis(student,this);
-    else unlockThis(student, this);
-});
+function lock(lock_btn){
+    var student = classlist[getClasslistIndex(lock_btn.parentNode.id)];
+    if (student.locked) {
+        student.locked = false;
+        unlockThis(lock_btn.parentNode, lock_btn);
+    }
+    else
+    {
+        student.locked = true;
+        lockThis(lock_btn.parentNode, lock_btn);
+    }
+};
 
-$('#lock_fem').click(function() {
-    var students = document.getElementsByClassName("student");
-    var f_lst = []; //list of female students
-    for (var i = 0; i < students.length; ++i)
+$('#lock_fems').click(function() {
+    var female_list = classlist.filter(function(obj)
+        {return obj.gender === "F"});
+    for (var i = 0; i < female_list.length; ++i)
     {
-        var gender = document.getElementById("gender_" + students[i].id).innerHTML;
-        if (gender === "F") f_lst[f_lst.length] = students[i];
-    }
-    for (var j = f_lst.length-1; j>=0; --j)
-    {
-        var lock = document.getElementById("lock_"+f_lst[j].id);
-        lockThis(f_lst[j],lock);
-    }
-    lock_fems = true;
-});
-$('#unlock_fem').click(function() {
-    lock_fems = false;
-    var students = document.getElementsByClassName("student");
-    var f_lst = []; //list of female students
-    for (var i = 0; i < students.length; ++i)
-    {
-        var gender = document.getElementById("gender_" + students[i].id).innerHTML;
-        if (gender === "F") f_lst[f_lst.length] = students[i];
-    }
-    for (var j = f_lst.length-1; j>=0; --j)
-    {
-        var lock = document.getElementById("lock_"+f_lst[j].id);
-        unlockThis(f_lst[j],lock);
+        var student_li = document.getElementById(female_list[i].id); 
+        var lock_btn = document.getElementById("lock_" + female_list[i].id); 
+        if ($('#lock_fems').prop("checked")) 
+        {
+            female_list[i].locked = true;
+            lockThis(student_li, lock_btn);
+        }
+        else
+        {
+            female_list[i].locked = false;
+            unlockThis(student_li, lock_btn);
+        }  
     }
 });
 
 $('#lock_pres').click(function() {
-    var students = document.getElementsByClassName("student");
-    var doc_groups = document.getElementsByClassName("group_mems");
-    for (var i = 0; i < students.length; ++i)
+
+    for (var i = 0; i < grouplist.length; ++i)
     {
-        for (var j = 0; j < doc_groups.length; ++j)
+        for (var j = 0; j < grouplist[i].preferred.length; ++j)
         {
-            var pres_lead = document.getElementById("glead_"+doc_groups[j].id).innerHTML;
-            var lead_spot = students[i].parentNode.id;
-            if (students[i].id === pres_lead) {
-                if (lead_spot === doc_groups[j].id) {
-                    var lock = document.getElementById("lock_"+students[i].id);
-                    changeColor(students[i]);
-                    students[i].style.backgroundColor = "white";
-                    lockThis(students[i],lock);
-                }
-                else {
-                    students[i].style.backgroundColor = "#D0A1A1";
-                }
-            }
+            
         }
     }
-    lock_pres = true;
+    // var students = document.getElementsByClassName("student");
+    // var doc_groups = document.getElementsByClassName("group_mems");
+    // for (var i = 0; i < students.length; ++i)
+    // {
+    //     for (var j = 0; j < doc_groups.length; ++j)
+    //     {
+    //         var pres_lead = document.getElementById("glead_"+doc_groups[j].id).innerHTML;
+    //         var lead_spot = students[i].parentNode.id;
+    //         if (students[i].id === pres_lead) {
+    //             if (lead_spot === doc_groups[j].id) {
+    //                 var lock = document.getElementById("lock_"+students[i].id);
+    //                 changeColor(students[i]);
+    //                 students[i].style.backgroundColor = "white";
+    //                 lockThis(students[i],lock);
+    //             }
+    //             else {
+    //                 students[i].style.backgroundColor = "#D0A1A1";
+    //             }
+    //         }
+    //     }
+    // }
+    // lock_pres = true;
 });
 
 $('#unlock_pres').click(function() {
@@ -133,32 +137,17 @@ function unlockThis(student, lock) {
 }
 
 function crosscheckLock(student) {
-    if ($(student).hasClass("ui-state-disabled")) {
-        if (set_gender) {
-            var gender = document.getElementById("gender_" + student.id).innerHTML;
-            if (gender == "F" && lock_fems) {
-                return false;
-            }
+    student = classlist[getClasslistIndex(student.id)];
+    if (student.locked) {
+        if ($('#lock_fems').prop("checked")) {
+            if (student.gender === "F") return false;
         }
-        if (lock_pres) {
-            var doc_groups = document.getElementsByClassName("group_mems");
-            var lead_spot = student.parentNode.id;
-            for (var j = 0; j < doc_groups.length; ++j)
-            {
-                var pres_lead = document.getElementById("glead_"+doc_groups[j].id).innerHTML;
-                if (student.id === pres_lead && lead_spot === doc_groups[j].id) return false;
-            } 
+        if ($('#lock_pres').prop("checked")) {
+            if (student.presenter === student.group) return false;
         }
-        if (lock_prefs){
-            var doc_groups = document.getElementsByClassName("group_mems");
-            for (var i = 0; i < doc_groups.length; ++i)
-            {
-                var prefs = document.getElementById("prefs_"+doc_groups[i].id).value;
-                if (prefs.indexOf(student.id) != -1) {
-                    console.log(student.id);
-                    return false;
-                }
-            }
+        if ($('#lock_prefs').prop("checked")){
+            var group = grouplist[getGrouplistIndex(student.group)];
+            if ($.inArray( student.id, group.preferred)) return false;
         }
     }
     return true;

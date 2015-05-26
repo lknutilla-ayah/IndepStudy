@@ -1,5 +1,7 @@
+var num_pref = 1;
+
 function createGCols() {
-    gcols = [{data: 'groupname'}, {data: 'leader'}];
+    gcols = [{data: 'groupname'}, {data: 'presenter'}];
     gcolH = ['GROUP NAME', 'PROPORSAL PRESENTER'];
 };
 createGCols();

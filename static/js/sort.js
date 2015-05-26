@@ -1,26 +1,7 @@
 //global variables
-    var group_max, group_min;
-    var nd_chk, rd_chk;//sort from 2nd choices, sort from 3rd choices
     var lock_fems = false, lock_pres = false, lock_prefs = false;
 
 $(document).ready( function() {
-    $( "ul.droptrue" ).sortable({
-        connectWith: "ul",
-        cancel: ".ui-state-disabled",
-        update: function(event, ui) {
-            if (ui.sender != null)
-            {
-                var old_grp = document.getElementById(ui.sender.attr('id'));
-                var new_grp = document.getElementById(ui.item.parent().attr('id'));
-                var student = document.getElementById(ui.item.attr('id'));
-                if (old_grp.id != "sortable_class") updateCount(old_grp);
-                if (new_grp.id != "sortable_class") updateCount(new_grp);
-                changeColor(student);
-            }
-        }
-    });
-    $( "#sortable_class" ).disableSelection();
-
     $("#grp_range").ionRangeSlider({
         type: "double",
         min: 0,
@@ -28,303 +9,289 @@ $(document).ready( function() {
         from: 3,
         to: 5,
         onStart: function (data) {
-            group_min = data.from;
-            group_max = data.to;
+            //not sure if this will work?
+            data.from = group_min;
+            data.to = group_max;
         },
         onChange: function (data) {
             group_min = data.from;
             group_max = data.to;
         }
     });
-    nd_chk = document.getElementById("2nd");
-    rd_chk = document.getElementById("3rd");
-
 })
 
 
 /*----CLASS LIST FUNCTIONS----*/
 
+/*Description:Sorts students into their first choice, and gives the sorter
+the ability to get a first approximation of class spread. If scores are provided, 
+sorts groups by score low to high.
+Disregards: max/min size, gender 
+*/
 $( "#sort_frst" ).click(function() {
-    //var students = document.getElementsByClassName("student");
-    var students = $("#sortable_class").children('li');
-    for (var i = students.length-1; i>=0; --i)
+    for (var i = 0; i < classlist.length; ++i)
     {
-        if ($(students[i]).hasClass("ui-state-disabled")) continue;
-        addStudentFromList(students[i]);
+        if (classlist[i].locked) continue;
+        addStudentFromList(classlist[i]);
     }
-    $("#ordr_scr").trigger("click");
+    if ($('#score').prop("checked")) $("#ordr_scr").trigger("click");
 });
+/*Description: Randomly sorts students into equally sized groups. 
+Disregards: max/min size, gender, preference, score.*/
 $( "#srt_rand" ).click(function() {
-    var students = document.getElementsByClassName("student");
-    students = [].slice.call(students,0);
-    var doc_groups = document.getElementsByClassName("group_mems");
-    var srt_class = document.getElementById("sortable_class");
-    var num_students = students.length;
-    var min = group_min;
-    //clear group counts
-    for (var i = 0; i < doc_groups.length; ++i)
+    $("#restart").trigger("click");
+    for (var i = 0; i < classlist.length; ++i)
     {
-        var members = $(doc_groups[i]).children('li');
-        for (var j = members.length-1; j >= 0; --j) 
+        var rand_new_grp = Math.floor(Math.random() * (grouplist.length-0));
+        while (!(grouplist[rand_new_grp].count < group_avg) || grouplist[rand_new_grp].deleted) 
         {
-            addMember(members[j],srt_class,doc_groups[i]);
+
+            rand_new_grp = Math.floor(Math.random() * (grouplist.length-0));
         }
-    }
-    while (num_students > 0 && min <= group_max) {
-        for (var i = 0; i < doc_groups.length; ++i)
-        {
-            var grp_sz = document.getElementById("gcount_"+doc_groups[i].id).value;
-            while (grp_sz < min && num_students > 0) 
-            {
-                var rand_student = Math.floor(Math.random() * (num_students - 0));
-                var student = students[rand_student];
-                addMember(student, doc_groups[i], srt_class);
-                students.splice(rand_student,1);
-                grp_sz = document.getElementById("gcount_"+doc_groups[i].id).value;
-                --num_students;
-            }   
-        }
-        ++min;
+        var student_li = document.getElementById(classlist[i].id);
+        var old_group_ul = document.getElementById(classlist[i].group);
+        var new_group_ul = document.getElementById(grouplist[rand_new_grp].id);
+        addMember(student_li, new_group_ul, old_group_ul);
     }
 });
-
+/*Description: This function sorts any students in the 
+Class List(id="sortable_class") evenly into the smallest groups.
+Disregards: max/min size, gender, preference, score, lock */
 $( "#srt_non" ).click(function() {
-    var srt_class = document.getElementById("sortable_class");
-    var doc_groups = document.getElementsByClassName("group_mems");
-    var min = group_min;
-    var max = group_max;
-    var no_pref_cnt = $("#sortable_class").children('li').length;
-    while (no_pref_cnt > 0 && min <= max) {
-        var no_pref = $("#sortable_class").children('li');
-        for (var i = no_pref.length-1; i >= 0; --i) 
-        {
-            for (var j = 0; j < doc_groups.length; ++j)
-            {
-                var grp_sz = document.getElementById("gcount_"+doc_groups[j].id).value;
-                if (grp_sz < min) {
-                    addMember(no_pref[i], doc_groups[j], srt_class);
-                    --no_pref_cnt;
-                    break;
-                }
-            }
-        }
-        ++min;
+    sortGroupL2H(grouplist, 'count');
+    var srt_class = $("#sortable_class").children('li');
+    for (var i = srt_class.length-1; i >=0; --i)
+    {
+        var old_group_ul = document.getElementById("sortable_class");
+        var new_group_ul = document.getElementById(grouplist[0].id);
+        addMember(srt_class[i], new_group_ul, old_group_ul);
+        sortGroupL2H(grouplist, 'count');
     }
-    if (no_pref_cnt > 0) {
-        alert("Group size must be increased in order to sort all students");
-    }    
 });
-
+/*Description: If gender is indicated, this function sorts any females into their top choice. 
+This is useful because the sorter can sort all of the females first and lock them (separately), 
+before sorting the whole class.
+Disregards: max/min size, score */
 $( "#srt_fem" ).click(function() {
-    var students = document.getElementsByClassName("student");
-    //var num_fem = document.getElementById("num_fem").value;
-    var f_lst = []; //list of female students
-    for (var i = 0; i < students.length; ++i)
+    var female_list = classlist.filter(function(obj)
+        {return obj.gender === "F"});
+    for (var i = 0; i < female_list.length; ++i)
     {
-        var gender = document.getElementById("gender_" + students[i].id).innerHTML;
-        if (gender === "F") f_lst[f_lst.length] = students[i];
-    }
-    for (var j = f_lst.length-1; j>=0; --j)
-    {
-        if ($(f_lst[j]).hasClass("ui-state-disabled")) continue;
-        addStudentFromList(f_lst[j]);
+        var student_li = document.getElementById(female_list[i].id);
+        $(student_li).addClass("female");
+        if (female_list[i].locked) continue;
+        addStudentFromList(female_list[i]);
     }
 });
-
-function addStudentFromList(student) {
-    var first = document.getElementById("first_" + student.id).innerHTML;
-    var second = document.getElementById("second_" + student.id).innerHTML;
-    var third = document.getElementById("third_" + student.id).innerHTML;
-    if (set_gender) var gender = document.getElementById("gender_" + student.id).innerHTML;
-    var top_choice;
-    // if (set_gender && gender === "F") student.style.backgroundColor = "#FFE5FF";
-    // else student.style.backgroundColor = "white";
-
-    if (document.getElementById(first)) top_choice = first;
-    else if (document.getElementById(second)) top_choice = second;
-    else if (document.getElementById(third)) top_choice = third;
-    else return;//leave in class list 
-    //var li_stud = document.getElementById(student.id);
-    var ul_group = document.getElementById(top_choice);
-    //ul_group.appendChild(li_stud);
-    ul_group.appendChild(student);
-    changeColor(student);
-    updateCount(ul_group);
-}
+/*Description: Places all students back into the Class List (id="sortable_class")
+Disregards: all */
+$( "#restart" ).click(function() {
+    for (var i = 0; i < classlist.length; ++i)
+    {
+        var student_li = document.getElementById(classlist[i].id);
+        var old_group_ul = document.getElementById(classlist[i].group);
+        var new_group_ul = document.getElementById("sortable_class");
+        addMember(student_li, new_group_ul, old_group_ul);
+    }
+});
 
 /*----GROUP SORT FUNCTIONS----*/
 
+/*Description: Sorts students by score highest to lowest
+Disregards: gender, locks */
 $( "#ordr_scr" ).click(function() {
-    var doc_groups = document.getElementsByClassName("group_mems");
-    for (var i = 0; i < doc_groups.length; ++i)
+    for (var i = 0; i < grouplist.length; ++i)
     {
-        var group = doc_groups[i];
-        var members = [];
-        $(group).find('li').each(function(){
-            members[members.length] = this;
-        });
-        members.sort(function(a, b) {
-            //a.id = student name
-            a = parseInt(document.getElementById("score_" + a.id).innerHTML);
-            b = parseInt(document.getElementById("score_" + b.id).innerHTML);
-            return a > b;
-        })
+        if (grouplist[i].deleted) continue;
+        var members = classlist.filter(function(obj)
+            {return obj.group === grouplist[i].id});
+        sortGroupH2L(members,'score');
         for (var j = 0; j < members.length; ++j)
         {
-            var score = document.getElementById("score_" + members[j].id).innerHTML;
-            group.appendChild(members[j]);
+            var student_li = document.getElementById(members[j].id);
+            var group_ul = document.getElementById(grouplist[i].id);
+            group_ul.appendChild(student_li);
         }
     }
 });
 
-$( ".delete_grp" ).click(function() {
-    var group = this.id;
-    group = group.replace('d_','');
-    var members = [];
-    group = document.getElementById(group);
-    $(group).find('li').each(function(){
-        members[members.length] = this;
-    });
-    var class_lst = document.getElementById("sortable_class");
-    for (var i = 0; i < members.length; ++i)
-    {
-        members[i].style.backgroundColor = "white";
-        class_lst.appendChild(members[i]);
-    }
-    var group_obj = document.getElementById("obj_" + group.id);
-    group_obj.parentNode.removeChild(group_obj);
-});
-
-$( ".remove_mem" ).click(function() {
-    var group = this.id;
-    group = group.replace('r_','');
-    var members = [];
-    group = document.getElementById(group);
-    $(group).find('li').each(function(){
-        members[members.length] = this;
-    });
-    for (var i = 0; i < members.length; ++i)
-    {
-        if (members.length <= group_min) {
-            alert("Group " + group.id + " is smaller than the min group size ("+ group_min +")");
-            break;
-        }
-        if ($(members[i]).hasClass("ui-state-disabled")) continue;
-        var first = document.getElementById("first_" + members[i].id).innerHTML;
-        var second = document.getElementById("second_" + members[i].id).innerHTML;
-        var third = document.getElementById("third_" + members[i].id).innerHTML;
-        if (document.getElementById("gcount_"+first) && 
-            document.getElementById("gcount_"+first).value < group_max && 
-            first != group.id) {
-            first = document.getElementById(first);
-            //members[i].style.backgroundColor = "white";
-            addMember(members[i], first, group);
-            return;
-        }
-        else if (document.getElementById("gcount_"+second) && 
-            document.getElementById("gcount_"+second).value < group_max && 
-            nd_chk.checked && second != group.id) {
-            second = document.getElementById(second);
-            //members[i].style.backgroundColor = "#D6E0FF";
-            addMember(members[i], second, group);
-            return;
-        }
-        else if (document.getElementById("gcount_"+third) &&
-            document.getElementById("gcount_"+third).value < group_max && 
-            rd_chk.checked && third != group.id) {
-            third = document.getElementById(third);
-            //members[i].style.backgroundColor = "#FFFFC2";
-            addMember(members[i], third, group);
-            return;
-        }
-    }
-});
-
-$( ".add_mem" ).click(function() {
-    var group = this.id;
-    var members;
+/*Description: The function searches through the other groups to find students that prefer this group,
+and moves them.
+Disregards: gender (unless locked) */
+function addNewMember(group_btn)
+{
+    var group = group_btn.id;
     group = group.replace('a_','');
-    group = document.getElementById(group);
-    if ($(group).children('li').length >= group_max) {
-        alert("Group " + group.id + " is already over the max group size (" + group_max + ")");
+    var group_data = grouplist[getGrouplistIndex(group)];
+    if (group_data.deleted) {
         return;
     }
-    var doc_groups = document.getElementsByClassName("group_mems");
-    for (var i = 0; i < doc_groups.length; ++i)
+    var group_ul = document.getElementById(group);
+
+    
+
+    if (group_data.count >= group_max)
     {
-        if (doc_groups[i].id === group.id) continue;
-        //members = [];
-        members = $(doc_groups[i]).children('li');
-        // $(doc_groups[i]).find('li').each(function(){
-        //     members[members.length] = this;
-        // });
-        for (var j = 0; j < members.length; ++j) //members[i] is student
+        var adding = confirm("WARNING: " + group_ul.id + " is larger than the max group size ("
+            + group_max +"). Cannot add member.");
+        if (adding === false) return;
+    }
+    sortGroupH2L(grouplist,'count');
+    for (var i = 0; i < grouplist.length; ++i)
+    {
+        if (grouplist[i].id === group_ul.id) continue;
+        var members = classlist.filter(function(obj)
+            {return obj.group === grouplist[i].id});
+        if (members.length <= group_min) continue;
+        if ($('#score').prop("checked")) sortGroupL2H(members, 'score');
+        for (var j = 0; j < members.length; ++j)
         {
-            if (members.length <= group_min) break;
-            if ($(members[j]).hasClass("ui-state-disabled")) continue;
-            var first = document.getElementById("first_" + members[j].id).innerHTML;
-            var second = document.getElementById("second_" + members[j].id).innerHTML;
-            var third = document.getElementById("third_" + members[j].id).innerHTML;
-            if (first === group.id) {
-                first = document.getElementById(first);
-                addMember(members[j], first, doc_groups[i]);
+            if (members[j].locked) continue;
+            var member_li = document.getElementById(members[j].id);
+            if (members[j].first === group_ul.id)
+            {
+                var old_group_ul = document.getElementById(grouplist[i].id);
+                addMember(member_li, group_ul, old_group_ul);
                 return;
             }
-            else if (second === group.id && nd_chk.checked) {
-                second = document.getElementById(second);//ul
-                addMember(members[j], second, doc_groups[i]);
+            if ($('#2nd').prop("checked") && members[j].second === group_ul.id)
+            {
+                var old_group_ul = document.getElementById(grouplist[i].id);
+                addMember(member_li, group_ul, old_group_ul);
                 return;
             }
-            else if (third === group.id && rd_chk.checked) {
-                third = document.getElementById(third);//ul
-                addMember(members[j], third, doc_groups[i]);
-                return;
+            if ($('#3rd').prop("checked") && members[j].third === group_ul.id)
+            {
+                var old_group_ul = document.getElementById(grouplist[i].id);
+                addMember(member_li, group_ul, old_group_ul);
+                return; 
             }
         }
     }
-    alert("No students would prefer to/ or are able to switch into " + group.id );  
-});
+    alert("Could not find students would prefer to/ or are able to switch into " + group.id + 
+        ". Consider allowing sorting into 2nd or 3rd preferences or deleting group." );
+};
 
-function addMember(student, new_grp, old_grp) {
-    new_grp.appendChild(student);
-    if (old_grp.id != "sortable_class") updateCount(old_grp);
-    if (new_grp.id != "sortable_class") updateCount(new_grp);
-    changeColor(student);
+/*Description: The function removes students in the group based on rank and preference.
+Disregards: gender (unless locked) */
+function removeMember(group_btn)
+{
+    var group = group_btn.id;
+    group = group.replace('r_','');
+    var group_data = grouplist[getGrouplistIndex(group)];
+    if (group_data.deleted) {
+        return;
+    }
+    var group_ul = document.getElementById(group);
+
+    var members = classlist.filter(function(obj)
+        {return obj.group === group_ul.id});
+    if (members.length <= group_min)
+    {
+        var removing = confirm("WARNING: " + group_ul.id +
+         " is smaller than the min group size ("+ group_min +").");
+        if (removing === false) return;
+    }
+    if ($('#score').prop("checked")) sortGroupL2H(members,'score');
+    for (var i = 0; i < members.length; ++i)
+    {
+        if (members[i].locked) continue;
+        var member_li = document.getElementById(members[i].id);
+        var first = grouplist[getGrouplistIndex(members[i].first)];
+        var second = grouplist[getGrouplistIndex(members[i].second)];
+        var third = grouplist[getGrouplistIndex(members[i].third)];
+        if( first.count < group_max && members[i].first != group_ul.id
+            && !first.deleted)
+        {
+            var new_group_ul = document.getElementById(first.id);
+            addMember(member_li, new_group_ul, group_ul);
+            return;
+        }
+        else if ($('#2nd').prop("checked") && second.count < group_max 
+            && members[i].second != group_ul.id && !second.deleted)
+        {
+            var new_group_ul = document.getElementById(second.id);
+            addMember(member_li, new_group_ul, group_ul);
+            return;
+        }
+        else if ($('#3rd').prop("checked") && third.count < group_max 
+            && members[i].third != group_ul.id && !third.deleted)
+        {
+            var new_group_ul = document.getElementById(third.id);
+            addMember(member_li, new_group_ul, group_ul);
+            return;
+        }
+    }
+    alert("Could not remove a member. Consider allowing sorting into 2nd or 3rd preferences.");
+
+};
+
+/*Description: The function deletes a group and places students in the Class List.
+The group is no longer included in any functionality.
+Disregards: all */
+function deleteGroup(group_btn)
+{
+    var group = group_btn.id;
+    group = group.replace('d_','');
+    var group_ul = document.getElementById(group);
+
+    var members = classlist.filter(function(obj)
+        {return obj.group === group_ul.id});
+
+    for (var i = 0; i < members.length; ++i)
+    {
+        var member_li = document.getElementById(members[i].id);
+        var new_group_ul = document.getElementById("sortable_class");
+        var old_group_ul = document.getElementById(members[i].group);
+        addMember(member_li, new_group_ul, group_ul);
+    }
+    grouplist[getGrouplistIndex(group)].deleted = true;
+    var available_groups = grouplist.filter(function(obj)
+        {return !obj.deleted});
+    group_avg = Math.ceil((classlist.length)/(available_groups.length));
+    group_max = group_avg +1;
+    group_min = group_avg -1;
+
+    grouplist[getGrouplistIndex(group)].count = classlist.length+1; 
+    $(group_ul).remove();
+    var group_obj = document.getElementById("obj_"+group);
+    $(group_obj).append('<label for="obj_"'+ group +'" id="delete_tag_'+ group +'">DELETED</label>');
+
+    $(group_btn).empty();
+    $(group_btn).append('<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>');
+    group_btn.onclick = function(event) { reAddGroup(this); };  
+};
+
+/*Description: The function re-adds a group.
+Disregards: all */
+function reAddGroup(group_btn)
+{
+    var group = group_btn.id;
+    group = group.replace('d_','');
+    var group_ul = document.getElementById(group);
+
+    grouplist[getGrouplistIndex(group)].deleted = false;
+    var available_groups = grouplist.filter(function(obj)
+        {return !obj.deleted});
+    group_avg = Math.ceil((classlist.length)/(available_groups.length));
+    group_max = group_avg +1;
+    group_min = group_avg -1;
+
+    grouplist[getGrouplistIndex(group)].count = 0; 
+
+    var group_members_ul = document.createElement("UL"); 
+    group_members_ul.className += "droptrue group_mems";
+    group_members_ul.id = group;
+    group_members_ul.style.backgroundColor = "white";
+    var group_obj = document.getElementById("obj_"+group);
+    $(group_obj).append(group_members_ul);
+    var delete_tag = document.getElementById("delete_tag_"+ group);
+    $(delete_tag).remove();
+    uploadSortable();
+
+    $(group_btn).empty();
+    $(group_btn).append('<span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>');
+    group_btn.onclick = function(event) { deleteGroup(this); }; 
 }
 
-/*----HELPER FUNCTIONS----*/
 
-function updateCount(group) {
-    document.getElementById("gcount_"+group.id).value = $(group).children('li').length;
-}
-
-function changeColor(student) {
-    var group = student.parentNode.id;
-    var first = document.getElementById("first_" + student.id);
-    var second = document.getElementById("second_" + student.id);
-    var third = document.getElementById("third_" + student.id);
-    if (set_gender) var gender = document.getElementById("gender_" + student.id).innerHTML;
-    if (set_gender && gender == "F") {
-        student.style.backgroundColor = "#FFF2FF";
-    }
-    if (first.innerHTML === group) {
-        first.style.color = "#00CC99";
-        second.style.color = "black";
-        third.style.color = "black";
-    }
-    else if (second.innerHTML === group) {
-        second.style.color = "#FFC266";
-        first.style.color = "black";
-        third.style.color = "black";
-    }
-    else if (third.innerHTML === group) {
-        third.style.color = "#A30000";
-        second.style.color = "black";
-        first.style.color = "black";
-    }
-    else {
-        first.style.color = "black";
-        second.style.color = "black";
-        third.style.color = "black";
-    }
-}

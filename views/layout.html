@@ -8,6 +8,7 @@
     <link rel="stylesheet" media="screen" href="css/handsontable.full.min.css">
     <link rel="stylesheet" media="screen" href="ion-slider/css/ion.rangeSlider.css">
     <link rel="stylesheet" media="screen" href="ion-slider/css/ion.rangeSlider.skinHTML5.css">
+    <link rel="stylesheet" media="screen" href="css/dropdowns-enhancement.min.css">
     <link rel="stylesheet" href="css/style.css">
     {% block head %}
   </head>
@@ -18,19 +19,25 @@
   <!-- javascript at end of body for better load times -->
   {% block foot %}
   <script src="jquery-1.11.2.min.js"></script>
-  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  <script src="jquery-ui.min.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
-  <!--{% if date %}<script src="js/dates.js"></script>{% endif %}-->
   <script src="js/handsontable.full.min.js"></script>
+  <script src="js/dropdowns-enhancement.js"></script>
   <script src="js/data_enter.js"></script>
+  {% if !tutorial %}
   <script src="js/student_data_enter.js"></script>
   <script src="js/group_data_enter.js"></script>
+  {% endif %}
   <script src="js/sort.js"></script>
+  <script src="js/sort_help.js"></script>
   <script src="js/locks.js"></script>
   <script src="ion-slider/js/ion-rangeSlider/ion.rangeSlider.min.js"></script>
   <script type="text/javascript">
     $('body').scrollspy({ target: '#sort-hat-navigation' })
   </script>
+  {% if tutorial %}
+    <script src="js/tutorial.js"></script>
+  {% endif %}
   {% endblock %}
   </body>
 </html>

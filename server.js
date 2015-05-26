@@ -92,11 +92,20 @@ app.get('/sortinghat', function (req, res) {
     res.render('new_class_tpl', { 
         title: 'Create New Class',
         class_obj: cur_class,
+        tutorial: false
     });
 });
 
 app.post('/sortinghat', function (req, res) {
     updateSettings(req);
+});
+
+app.get('/tutorial', function (req, res) {
+    //addDummyData();
+    res.render('new_class_tpl', { 
+        title: 'Tutorial',
+        tutorial: true 
+    });
 });
 
 // app.get('/', function (req, res) {
@@ -149,15 +158,6 @@ app.post('/sortinghat', function (req, res) {
 //         class_site: true 
 //     });
 // });
-
-app.get('/tutorial', function (req, res) {
-    addDummyData();
-    res.render('class_tpl', { 
-        title: 'Sort Students',
-        class_data: cur_class,
-        class_site: true 
-    });
-});
 
 /*******************************************************
  *

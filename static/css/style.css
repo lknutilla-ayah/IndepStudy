@@ -23,9 +23,18 @@ body {
     display: block;
 }
 
+.female {
+    background-color: #FFF2FF;
+}
+
 #sortable_class {
     min-height: 50px;
     padding-bottom: 50px;
+}
+
+.grp_sz_box {
+    width: 30px; 
+    margin: 5px;
 }
 
 .group_mems {

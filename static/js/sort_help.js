@@ -72,20 +72,18 @@ function changeColor(student_li) {
     // }
     if ($('#stud_pref').prop("checked"))
     { 
+        
         if (first && student.first === student.group) {
             first.style.color = "#00CC99";
-            second.style.color = "black";
-            third.style.color = "black";
+            setOutColor(second, third);
         }
         else if (second && student.second === student.group) {
             second.style.color = "#FFC266";
-            first.style.color = "black";
-            third.style.color = "black";
+            setOutColor(first, third);
         }
         else if (third && student.third === student.group) {
             third.style.color = "#A30000";
-            second.style.color = "black";
-            first.style.color = "black";
+            setOutColor(first, second);
         }
         else {
             if (first) first.style.color = "black";
@@ -97,4 +95,10 @@ function changeColor(student_li) {
     {
         if (student.presenter === student.group) $(student_li).removeClass("pres_danger");
     }
+}
+
+function setOutColor(out_group_1, out_group_2)
+{
+    if (out_group_1) out_group_1.style.color = "black";
+    if (out_group_2) out_group_2.style.color = "black";
 }

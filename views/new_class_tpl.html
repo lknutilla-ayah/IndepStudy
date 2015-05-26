@@ -1,9 +1,14 @@
 {% extends 'layout.html' %}
 {% block inner %}
+<script>
+var tutorial = "{{ tutorial }}";
+var get_classlist = "{{ classlist }}";
+var get_grouplist = "{{ grouplist }}";
+</script>
   <div class="container">
     <h3>{{ heading }}</h3>
     <div class="jumbotron" id="settings">
-        <form class="form-horizontal" method="POST">
+        <form class="form-horizontal" enctype="multipart/form-data">
           <div class="form-group">
             <h4><label for="classname" class="col-sm-2 control-label">Class Name</label></h4>
             <div class="col-sm-8 col-md-8">
@@ -40,11 +45,11 @@
                   </div>
                 </div>
             </div>
-          <div class="form-group">
-            <div class="col-md-10">
-               <a href="#data-entry"><button type="submit" class="btn btn-default">Enter Settings</button></a>
+            <div class="form-group">
+                <div class="col-md-10">
+                  <a href="#data-entry"><button id = "upload_settings" type="button" class="btn btn-default">Upload</button></a>
+                </div>
             </div>
-          </div>
         </form>
     </div>
     <div class="jumbotron" id="data-entry">
@@ -109,6 +114,7 @@
                         <li role="presentation" class="divider"></li>
                         <li><a id="srt_non">Sort Remaining Students in Class List into Smallest Groups</a></li>
                         <li><a id="restart">Clear Groups (Start Over)</a></li>
+                        <li><a id="srt_rand">Create Randomized Groups</a></li>
                       </ul>
                     </li>
                     <li class="dropdown">
@@ -124,8 +130,6 @@
                         <li><input type="checkbox" name="lock_pres" id="lock_pres"><label for="lock_pres">Lock Presenters</label></li>
                         <li><input type="checkbox" name="lock_prefs" id="lock_prefs"><label for="lock_prefs">Lock Presenter Preferences</label></li>
                         <li><input type="checkbox" name="lock_fems" id="lock_fems"><label for="lock_fems">Lock Females</label></li>
-                        <li role="presentation" class="divider"></li>
-                        <li><a id="srt_rand">Create Randomized Groups</a></li>
                       </ul>
                     </li>
                   </ul>

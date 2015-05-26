@@ -11,39 +11,42 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 })); 
 
 //define global variables//
-var class_list = [];
-var cur_class = new newClass();
-var pref_set = false;
-var upload_data;
+var classlist = [];
+var grouplist = [];
 
-// define object constructors
-//function newClass(classname, start, end, gender, score, stud_pref, lead_pref) {
-function newClass() {
-    this.classname = '';
-    this.gender = false;
-    this.score = false;
-    this.stud_pref = true;
-    this.lead_pref = false;
-    this.classlist = [];
-    this.grouplist = [];
-}
+// var class_list = [];
+// var cur_class = [];
+// var pref_set = false;
+// var upload_data;
 
-function Student(name, gender, score, first, second, third) {
-    this.name = name;
-    this.gender = gender;
-    this.score = score;
-    this.first = first;
-    this.second = second;
-    this.third = third;
-}
+// // define object constructors
+// //function newClass(classname, start, end, gender, score, stud_pref, lead_pref) {
+// function newClass() {
+//     this.classname = '';
+//     this.gender = false;
+//     this.score = false;
+//     this.stud_pref = true;
+//     this.lead_pref = false;
+//     this.classlist = [];
+//     this.grouplist = [];
+// }
 
-function Group(groupname, stud_leader, prefs, number_id) {
-  this.groupname = groupname;
-  this.leader = stud_leader;
-  this.preferences = [];
-  this.preferences = prefs;
-  this.id = number_id;
-}
+// function Student(name, gender, score, first, second, third) {
+//     this.name = name;
+//     this.gender = gender;
+//     this.score = score;
+//     this.first = first;
+//     this.second = second;
+//     this.third = third;
+// }
+
+// function Group(groupname, stud_leader, prefs, number_id) {
+//   this.groupname = groupname;
+//   this.leader = stud_leader;
+//   this.preferences = [];
+//   this.preferences = prefs;
+//   this.id = number_id;
+// }
 
 
 //define templates//
@@ -91,13 +94,20 @@ app.get('/', function (req, res) {
 app.get('/sortinghat', function (req, res) {
     res.render('new_class_tpl', { 
         title: 'Create New Class',
-        class_obj: cur_class,
+        classlist: classlist,
+        grouplist: grouplist,
         tutorial: false
     });
 });
 
 app.post('/sortinghat', function (req, res) {
-    updateSettings(req);
+    console.log("CLASSLIST");
+    console.log(req.body.classlist);
+    console.log("GROUPLIST");
+    console.log(req.body.grouplist);
+    classlist = req.body.classlist;
+    grouplist = req.body.grouplist;
+
 });
 
 app.get('/tutorial', function (req, res) {
@@ -107,57 +117,6 @@ app.get('/tutorial', function (req, res) {
         tutorial: true 
     });
 });
-
-// app.get('/', function (req, res) {
-//     pref_set = false;
-//     res.render('new_class_form_1', { 
-//         title: 'Sort New Class',
-//         heading: 'Class Settings',
-//         date: true
-//     });
-// });
-
-// app.post('/', function (req, res) {
-//     var new_class = addClassName(req);
-//     res.redirect("/upload");
-// });
-
-// app.get('/upload', function (req, res) {
-//     res.render('new_class_form_2', { 
-//         title: 'Sort New Class',
-//         heading: 'Enter Class Data for ' + cur_class.classname,
-//         class_obj: cur_class,
-//         files: true
-//     });
-// });
-
-
-// app.post('/upload', function (req, res) {
-//     if (req.body.student) {
-//         addStudent(req);
-//         res.send(true);
-//     }
-//     else if (req.body.group) {
-//         addGroupList(req);
-//         res.send(true);
-//     }
-//     else { 
-//         res.contentType('application/json');
-//         var site = JSON.stringify('/class');//add stud_data content to .get/upload
-//         res.header('Content-Length', site.length);
-//         res.send(site);
-//     }
-// });
-
-// app.get('/class', function (req, res) {
-//     //addDummyData();
-//     if (!pref_set) convertStudentPreferences();
-//     res.render('class_tpl', { 
-//         title: 'Sort Students',
-//         class_data: cur_class,
-//         class_site: true 
-//     });
-// });
 
 /*******************************************************
  *

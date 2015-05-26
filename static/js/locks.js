@@ -11,15 +11,18 @@ function lock(lock_btn){
 };
 
 $('#lock_fems').click(function() {
-    var female_list = classlist.filter(function(obj)
-        {return obj.gender === "F"});
-    for (var i = 0; i < female_list.length; ++i)
+    if ($('#gender').prop("checked"))
     {
-        var student_li = document.getElementById(female_list[i].id); 
-        var lock_btn = document.getElementById("lock_" + female_list[i].id); 
-        $(student_li).addClass("female");
-        if ($('#lock_fems').prop("checked")) lockThis(student_li, lock_btn);
-        else unlockThis(student_li, lock_btn);
+        var female_list = classlist.filter(function(obj)
+            {return obj.gender === "F"});
+        for (var i = 0; i < female_list.length; ++i)
+        {
+            var student_li = document.getElementById(female_list[i].id); 
+            var lock_btn = document.getElementById("lock_" + female_list[i].id); 
+            $(student_li).addClass("female");
+            if ($('#lock_fems').prop("checked")) lockThis(student_li, lock_btn);
+            else unlockThis(student_li, lock_btn);
+        }
     }
 });
 
@@ -51,26 +54,31 @@ $('#lock_pres').click(function() {
 });
 
 $('#lock_prefs').click(function() {
-    for (var i = 0; i < grouplist.length; ++i)
+    if ($('#lead_pref').prop("checked"))
     {
-        for (var j = 0; j < grouplist[i].preferred.length; ++j)
+        for (var i = 0; i < grouplist.length; ++i)
         {
-            var student = classlist[getClasslistIndex(grouplist[i].preferred[j])];
-            if (student.group === grouplist[i].id)
+            for (var j = 0; j < grouplist[i].preferred.length; ++j)
             {
-                var student_li = document.getElementById(student.id);
-                var lock_btn = document.getElementById("lock_" + student.id);
-                if ($('#lock_prefs').prop("checked")) lockThis(student_li, lock_btn);
-                else unlockThis(student_li, lock_btn);
+                var student = classlist[getClasslistIndex(grouplist[i].preferred[j])];
+                if (student.group === grouplist[i].id)
+                {
+                    var student_li = document.getElementById(student.id);
+                    var lock_btn = document.getElementById("lock_" + student.id);
+                    if ($('#lock_prefs').prop("checked")) lockThis(student_li, lock_btn);
+                    else unlockThis(student_li, lock_btn);
+                }
             }
         }
     }
 });
 
-function lockThis(student, lock) {
-    classlist[getClasslistIndex(student.id)].locked = true;
-    if (!$(student).hasClass("ui-state-disabled")) {
-        $(student).addClass("ui-state-disabled");
+function lockThis(student_li, lock) {
+    var student = classlist[getClasslistIndex(student_li.id)];
+    if (student.group === "sortable_class") return;
+    student.locked = true;
+    if (!$(student_li).hasClass("ui-state-disabled")) {
+        $(student_li).addClass("ui-state-disabled");
         lock.style.backgroundColor = "#666666";
     }
 }

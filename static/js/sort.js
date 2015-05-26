@@ -1,10 +1,3 @@
-//global variables
-
-$(document).ready( function() {
-
-})
-
-
 /*----CLASS LIST FUNCTIONS----*/
 
 /*Description:Sorts students into their first choice, and gives the sorter
@@ -13,12 +6,15 @@ sorts groups by score low to high.
 Disregards: max/min size, gender 
 */
 $( "#sort_frst" ).click(function() {
-    for (var i = 0; i < classlist.length; ++i)
+    if ($('#stud_pref').prop("checked"))
     {
-        if (classlist[i].locked) continue;
-        addStudentFromList(classlist[i]);
+        for (var i = 0; i < classlist.length; ++i)
+        {
+            if (classlist[i].locked) continue;
+            addStudentFromList(classlist[i]);
+        }
+        if ($('#score').prop("checked")) $("#ordr_scr").trigger("click");
     }
-    if ($('#score').prop("checked")) $("#ordr_scr").trigger("click");
 });
 /*Description: Randomly sorts students into equally sized groups. 
 Disregards: max/min size, gender, preference, score.*/
@@ -57,14 +53,17 @@ This is useful because the sorter can sort all of the females first and lock the
 before sorting the whole class.
 Disregards: max/min size, score */
 $( "#srt_fem" ).click(function() {
-    var female_list = classlist.filter(function(obj)
-        {return obj.gender === "F"});
-    for (var i = 0; i < female_list.length; ++i)
+    if ($('#gender').prop("checked"))
     {
-        var student_li = document.getElementById(female_list[i].id);
-        $(student_li).addClass("female");
-        if (female_list[i].locked) continue;
-        addStudentFromList(female_list[i]);
+        var female_list = classlist.filter(function(obj)
+            {return obj.gender === "F"});
+        for (var i = 0; i < female_list.length; ++i)
+        {
+            var student_li = document.getElementById(female_list[i].id);
+            $(student_li).addClass("female");
+            if (female_list[i].locked) continue;
+            addStudentFromList(female_list[i]);
+        }
     }
 });
 /*Description: Places all students back into the Class List (id="sortable_class")
@@ -84,17 +83,20 @@ $( "#restart" ).click(function() {
 /*Description: Sorts students by score highest to lowest
 Disregards: gender, locks */
 $( "#ordr_scr" ).click(function() {
-    for (var i = 0; i < grouplist.length; ++i)
+    if ($('#score').prop("checked"))
     {
-        if (grouplist[i].deleted) continue;
-        var members = classlist.filter(function(obj)
-            {return obj.group === grouplist[i].id});
-        sortGroupH2L(members,'score');
-        for (var j = 0; j < members.length; ++j)
+        for (var i = 0; i < grouplist.length; ++i)
         {
-            var student_li = document.getElementById(members[j].id);
-            var group_ul = document.getElementById(grouplist[i].id);
-            group_ul.appendChild(student_li);
+            if (grouplist[i].deleted) continue;
+            var members = classlist.filter(function(obj)
+                {return obj.group === grouplist[i].id});
+            sortGroupH2L(members,'score');
+            for (var j = 0; j < members.length; ++j)
+            {
+                var student_li = document.getElementById(members[j].id);
+                var group_ul = document.getElementById(grouplist[i].id);
+                group_ul.appendChild(student_li);
+            }
         }
     }
 });

@@ -8,21 +8,20 @@ var
   grouplist = [],
   group_max, group_min, group_avg;
 
-/*
-  INSERT ON DOCUMENT READY THAT DISABLES/ENABLES ANY SORT FUNCTION ITEM IF NOT CHECKED
-*/
-
 stud_container.style.width = '100%';
 stud_container.style.overflow = "scroll";
 group_container.style.width = '100%';
 group_container.style.overflow = "scroll";
 
 $('#upload').click(function() {
-  //put in alert that data will be lost or handle case
   $('#grp_tbl').empty();
   $('.student').remove();
-  if (classlist.length === 0) uploadClass();
-  else updateClass();
+  if (classlist.length === 0) {
+    uploadClass();
+  }
+  else {
+    updateClass();
+  }
   uploadGroupData();
   uploadStudentData();
   
@@ -36,6 +35,13 @@ $('#upload').click(function() {
   group_min = group_avg -1;
 
   uploadSortable();
+  console.log("tutorial: " + tutorial);
+  if (tutorial === "false")
+  {
+    console.log("server");
+    sendDataToServer();
+  }
+
 });
 
 function uploadSortable()
@@ -61,31 +67,29 @@ function uploadSortable()
 }
 
 function uploadGroupData() {
-  var group_data = group_HT.getData();
   var count = 0;
-  while (count < group_data.length-1)
+  while (count < grouplist.length)
   {
-    if (!group_data[count].groupname) continue;
     var tr = document.createElement("TR");
-    for (var i = 0; i < 3 && count < group_data.length-1; ++i)
+    for (var i = 0; i < 3 && count < grouplist.length; ++i)
     {
       var td = document.createElement("TD");
       var group_obj = document.createElement("DIV");
-      group_obj.id = "obj_"+group_data[count].groupname;
+      group_obj.id = "obj_"+grouplist[count].id;
       $(group_obj).append(count + ".) ");
-      $(group_obj).append(group_data[count].groupname + " ");
-      $(group_obj).append(group_data[count].presenter + " ");
+      $(group_obj).append(grouplist[count].id + " ");
+      $(group_obj).append(grouplist[count].presenter + " ");
       var group_size = document.createElement("INPUT");
         group_size.className += "grp_sz_box";
-        group_size.id = "gcount_" + group_data[count].groupname;
+        group_size.id = "gcount_" + grouplist[count].id;
         group_size.type = "number";
-        group_size.value = "0";
+        group_size.value = grouplist[count].count;
         group_size.readOnly = "true";
       $(group_obj).append(group_size);
 
       var group_members_ul = document.createElement("UL"); 
       group_members_ul.className += "droptrue group_mems group_ul";
-      group_members_ul.id = group_data[count].groupname;
+      group_members_ul.id = grouplist[count].id;
       group_members_ul.style.backgroundColor = "white";
 
       var group_btns = document.createElement("DIV");
@@ -93,21 +97,21 @@ function uploadGroupData() {
         group_btns.role = "group";
           var add_btn = document.createElement("BUTTON");
           add_btn.className += "btn btn-default add_mem";
-          add_btn.id = "a_" + group_data[count].groupname;
+          add_btn.id = "a_" + grouplist[count].id;
           $(add_btn).append('<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>');
           add_btn.onclick = function(event) { addNewMember(this); };
           $(group_btns).append(add_btn);
           
           var sub_btn = document.createElement("BUTTON");
           sub_btn.className += "btn btn-default remove_mem";
-          sub_btn.id = "r_" + group_data[count].groupname;
+          sub_btn.id = "r_" + grouplist[count].id;
           $(sub_btn).append('<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>');
           sub_btn.onclick = function(event) { removeMember(this); };
           $(group_btns).append(sub_btn);
           
           var delete_btn = document.createElement("BUTTON");
           delete_btn.className += "btn btn-default delete_grp";
-          delete_btn.id = "d_" + group_data[count].groupname;
+          delete_btn.id = "d_" + grouplist[count].id;
           $(delete_btn).append('<span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>');
           delete_btn.onclick = function(event) { deleteGroup(this); };
           $(group_btns).append(delete_btn);
@@ -123,14 +127,11 @@ function uploadGroupData() {
 }
 
 function uploadStudentData() {
-  var group_data = group_HT.getData();
-
   for (var i = 0; i < classlist.length; ++i)
   {
     var student = document.createElement("LI");
     student.className += "ui-state-default list-group-item student";
     student.id = classlist[i].id;
-    $(student).append(classlist[i].id + ".) ");
     var student_lock = document.createElement("BUTTON");
     student_lock.className += "btn btn-default btn-xs lock";
     student_lock.id = "lock_" + student.id;
@@ -142,23 +143,23 @@ function uploadStudentData() {
     if ($('#score').prop("checked")) $(student).append(classlist[i].score + " ");
     if ($('#stud_pref').prop("checked")) 
     {
-        var first_pref = group_data.map(function(obj) 
-          {return obj.groupname; }).indexOf(classlist[i].first);
+        var first_pref = grouplist.map(function(obj) 
+          {return obj.id; }).indexOf(classlist[i].first);
         if (first_pref != -1)
         {
-          $(student).append('<label for="'+ student.id +'" id="first_'+ student.id +'">'+ first_pref +'</label>');
+          $(student).append('<label for="'+ student.id +'" id="first_'+ student.id +'" class="preference">'+ first_pref +'</label>');
         }
-        var second_pref = group_data.map(function(obj) 
-          {return obj.groupname; }).indexOf(classlist[i].second);
+        var second_pref = grouplist.map(function(obj) 
+          {return obj.id; }).indexOf(classlist[i].second);
         if (second_pref != -1)
         {
-        $(student).append('<label for="'+ student.id +'" id="second_'+ student.id +'">'+ second_pref +'</label>');
+        $(student).append('<label for="'+ student.id +'" id="second_'+ student.id +'" class="preference">'+ second_pref +'</label>');
         }
-        var third_pref = group_data.map(function(obj) 
-          {return obj.groupname; }).indexOf(classlist[i].third);
+        var third_pref = grouplist.map(function(obj) 
+          {return obj.id; }).indexOf(classlist[i].third);
         if (third_pref != -1)
         {
-          $(student).append('<label for="'+ student.id +'" id="third_'+ student.id +'">'+ third_pref +'</label>');
+          $(student).append('<label for="'+ student.id +'" id="third_'+ student.id +'" class="preference">'+ third_pref +'</label>');
         }
     }
     var group_ul = document.getElementById(classlist[i].group);
@@ -201,9 +202,9 @@ function updateClass()
       if ($('#score').prop("checked")) student.score = student_data[i].score;
       if ($('#stud_pref').prop("checked"))
       {
-        if (student_data[i].first != undefined ) student.first = student_data[i].first;
-        if (student_data[i].second != undefined ) student.second = student_data[i].second;
-        if (student_data[i].third != undefined ) student.third = student_data[i].third;
+        if (student_data[i].first != undefined ) student.first = "Group " + student_data[i].first;
+        if (student_data[i].second != undefined ) student.second = "Group " + student_data[i].second;
+        if (student_data[i].third != undefined ) student.third = "Group " + student_data[i].third;
       }
     }
     else
@@ -247,9 +248,9 @@ function Student(data)
   if ($('#score').prop("checked")) this.score = data.score;
   if ($('#stud_pref').prop("checked"))
   {
-    if (data.first != undefined ) this.first = data.first;
-    if (data.second != undefined ) this.second = data.second;
-    if (data.third != undefined ) this.third = data.third;
+    if (data.first != undefined && data.first != "") this.first = "Group " + data.first;
+    if (data.second != undefined && data.second != "") this.second = "Group " + data.second;
+    if (data.third != undefined && data.third != "") this.third = "Group " + data.third;
   }
   this.presenter = -1;
   this.group = "sortable_class";
@@ -258,7 +259,7 @@ function Student(data)
 
 function Group(data)
 {
-  this.id = data.groupname;
+  this.id = "Group " + data.groupname;
   this.presenter = data.presenter;
   var pres_index = classlist.map(function(obj) 
       {return obj.id; }).indexOf(this.presenter);
@@ -273,28 +274,6 @@ function Group(data)
   }
 }
 
-/*
-{% for student in class_data.classlist %}
-<li class="ui-state-default list-group-item student" id="{{ student.name }}">
-    {% set count = loop.index %}
-    {{ count }}
-    <button type="button" class="btn btn-default btn-xs lock" id="lock_{{ student.name }}"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></button> 
-    <label for="{{ student.name }}" id="name_{{ student.name }}">{{ student.name }}</label>
-    {% if class_data.gender %}
-    M/F: 
-    <label for="{{ student.name }}" id="gender_{{ student.name }}">{{ student.gender }}</label>
-    {% endif %}
-    {% if class_data.score %}
-    Score: 
-    <label for="{{ student.name }}" id="score_{{ student.name }}">{{ student.score }}</label>
-    {% endif %}
-    Prefs: 
-    <label for="{{ student.name }}" id="first_{{ student.name }}">{{ student.first }}</label>
-    <label for="{{ student.name }}" id="second_{{ student.name }}">{{ student.second }}</label>
-    <label for="{{ student.name }}" id="third_{{ student.name }}">{{ student.third }}</label> 
-</li>
-{% endfor %}
-*/
 // $('#upload').click(function() {
 //   var s_row_cnt = student_HT.countRows();
 //   var g_row_cnt = group_HT.countRows();
@@ -348,11 +327,6 @@ function Group(data)
 //   });
 // }
 
-
-// function ServiceFailed(result) {
-//   console.log("fail");
-//   Type = null; Url = null; Data = null; ContentType = null; DataType = null; ProcessData = null;
-// }
 
 // function fillJSONStudent(data) {
 //   var name = data[0];

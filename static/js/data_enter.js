@@ -29,12 +29,15 @@ $('#upload').click(function() {
   $('.student').remove();
   var student_data = student_HT.getData();
   var group_data = group_HT.getData();
-  if (classlist.length === 0) {
-    uploadClass(student_data, group_data);
-  }
-  else {
-    updateClass(student_data, group_data);
-  }
+  classlist = [];
+  grouplist = [];
+  uploadClass(student_data, group_data);
+  // if (classlist.length === 0) {
+  //   uploadClass(student_data, group_data);
+  // }
+  // else {
+  //   updateClass(student_data, group_data);
+  // }
   uploadGroupData();
   uploadStudentData();
 
@@ -197,57 +200,57 @@ function uploadClass(student_data, group_data)
   }
 }
 
-function updateClass(student_data, group_data) 
-{
-  for (var i = 0; i < student_data.length-1; ++i)
-  {
-    var inClass = classlist.map(function(obj) 
-        {return obj.id; }).indexOf(student_data[i].id);
-    if (inClass != -1)//in class
-    {
-      var student = classlist[inClass];
-      if ($('#gender').prop("checked")) student.gender = student_data[i].gender;
-      if ($('#score').prop("checked")) student.score = student_data[i].score;
-      if ($('#stud_pref').prop("checked"))
-      {
-        if (student_data[i].first != undefined ) student.first = student_data[i].first;
-        if (student_data[i].second != undefined ) student.second = student_data[i].second;
-        if (student_data[i].third != undefined ) student.third = student_data[i].third;
-      }
-    }
-    else
-    {
-      if (!student_data[i].id || student_data[i].id === null) continue;
-      var student = new Student(student_data[i]);
-      classlist[classlist.length] = student;
-    }
-  }
-  for (var i = 0; i < group_data.length-1; ++i)
-  {
-    var inGroup = grouplist.map(function(obj) 
-        {return obj.id; }).indexOf(group_data[i].id);
-    if (inGroup != -1)//in class
-    {
-      var group = grouplist[inGroup];
-      group.presenter = group_data[i].presenter;
-      var pres_index = classlist.map(function(obj) 
-          {return obj.id; }).indexOf(group.presenter);
-      classlist[pres_index].presenter = group.id;
-      group.preferred = [];
-      for (var j = 1; j < num_pref; ++j)
-      {
-        if (group_data[i]["preference_"+j] === undefined ) continue;
-        group.preferred[group.preferred.length] = group_data[i]["preference_"+j];
-      }
-    }
-    else
-    {
-      if (!group_data[i].groupname) continue;
-      var group = new Group(group_data[i]);
-      grouplist[grouplist.length] = group;
-    }
-  }
-}
+// function updateClass(student_data, group_data) 
+// {
+//   for (var i = 0; i < student_data.length-1; ++i)
+//   {
+//     var inClass = classlist.map(function(obj) 
+//         {return obj.id; }).indexOf(student_data[i].id);
+//     if (inClass != -1)//in class
+//     {
+//       var student = classlist[inClass];
+//       if ($('#gender').prop("checked")) student.gender = student_data[i].gender;
+//       if ($('#score').prop("checked")) student.score = student_data[i].score;
+//       if ($('#stud_pref').prop("checked"))
+//       {
+//         if (student_data[i].first != undefined ) student.first = student_data[i].first;
+//         if (student_data[i].second != undefined ) student.second = student_data[i].second;
+//         if (student_data[i].third != undefined ) student.third = student_data[i].third;
+//       }
+//     }
+//     else
+//     {
+//       if (!student_data[i].id || student_data[i].id === null) continue;
+//       var student = new Student(student_data[i]);
+//       classlist[classlist.length] = student;
+//     }
+//   }
+//   for (var i = 0; i < group_data.length-1; ++i)
+//   {
+//     var inGroup = grouplist.map(function(obj) 
+//         {return obj.id; }).indexOf(group_data[i].id);
+//     if (inGroup != -1)//in class
+//     {
+//       var group = grouplist[inGroup];
+//       group.presenter = group_data[i].presenter;
+//       var pres_index = classlist.map(function(obj) 
+//           {return obj.id; }).indexOf(group.presenter);
+//       classlist[pres_index].presenter = group.id;
+//       group.preferred = [];
+//       for (var j = 1; j < num_pref; ++j)
+//       {
+//         if (group_data[i]["preference_"+j] === undefined ) continue;
+//         group.preferred[group.preferred.length] = group_data[i]["preference_"+j];
+//       }
+//     }
+//     else
+//     {
+//       if (!group_data[i].groupname) continue;
+//       var group = new Group(group_data[i]);
+//       grouplist[grouplist.length] = group;
+//     }
+//   }
+// }
 
 function Student(data)
 {

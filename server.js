@@ -13,41 +13,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 //define global variables//
 var classlist = [];
 var grouplist = [];
-
-// var class_list = [];
-// var cur_class = [];
-// var pref_set = false;
-// var upload_data;
-
-// // define object constructors
-// //function newClass(classname, start, end, gender, score, stud_pref, lead_pref) {
-// function newClass() {
-//     this.classname = '';
-//     this.gender = false;
-//     this.score = false;
-//     this.stud_pref = true;
-//     this.lead_pref = false;
-//     this.classlist = [];
-//     this.grouplist = [];
-// }
-
-// function Student(name, gender, score, first, second, third) {
-//     this.name = name;
-//     this.gender = gender;
-//     this.score = score;
-//     this.first = first;
-//     this.second = second;
-//     this.third = third;
-// }
-
-// function Group(groupname, stud_leader, prefs, number_id) {
-//   this.groupname = groupname;
-//   this.leader = stud_leader;
-//   this.preferences = [];
-//   this.preferences = prefs;
-//   this.id = number_id;
-// }
-
+var settings = {};
 
 //define templates//
 var header_tpl = swig.compileFile('views/header.html');
@@ -94,21 +60,23 @@ app.get('/', function (req, res) {
 app.get('/sortinghat', function (req, res) {
     res.render('new_class_tpl', { 
         title: 'Create New Class',
-        classlist: classlist,
-        grouplist: grouplist,
         tutorial: false
     });
 });
 
 app.post('/sortinghat', function (req, res) {
-    console.log("CLASSLIST");
-    console.log(req.body.classlist);
-    console.log("GROUPLIST");
-    console.log(req.body.grouplist);
-    classlist = req.body.classlist;
-    grouplist = req.body.grouplist;
-
+    classlist = [];
+    grouplist = [];
+    setClasslist(req.body.classlist);
+    setGrouplist(req.body.grouplist);
+    setSettings(req.body.settings);
 });
+
+app.get('/classinfo', function (req, res) {
+    var class_info = {classlist: classlist, grouplist: grouplist, settings: settings};
+    res.send(class_info);
+});
+
 
 app.get('/tutorial', function (req, res) {
     //addDummyData();
@@ -131,116 +99,179 @@ function startListen() {
     });
 }
 
-function updateSettings(req) {
-    console.log(cur_class.gender);
-    cur_class.classname = req.body.classname;
-    //req.params.name = name;
-    //var startDate = req.body.startDate;
-    //var endDate = req.body.endDate;
-    cur_class.gender = req.body.gender;
-    cur_class.score = req.body.survey;
-    cur_class.stud_pref = req.body.stud_pref;
-    cur_class.lead_pref = req.body.lead_pref;
-    console.log(cur_class.gender);
-    console.log(cur_class.classname);
-    //cur_class = new newClass(name, startDate, endDate, gender, score, stud_pref, lead_pref);
-    // cur_class = new newClass(name, gender, score, stud_pref, lead_pref);
-    // class_list[class_list.length] = cur_class;
+function Student(id, gender, score, first, second, third, presenter, group, locked) {
+    this.id = id;
+    this.gender = gender;
+    this.score = parseInt(score);
+    this.first = first;
+    this.second = second;
+    this.third = third;
+    this.presenter = presenter;
+    this.group = group;
+    this.locked = locked;
 }
 
-function addClassName(req) {
-    var name = req.body.newClass;
-    req.params.name = name;
-    //var startDate = req.body.startDate;
-    //var endDate = req.body.endDate;
-    var gender = req.body.gender;
-    var score = req.body.survey;
-    var stud_pref = req.body.stud_pref;
-    var lead_pref = req.body.lead_pref;
-    //cur_class = new newClass(name, startDate, endDate, gender, score, stud_pref, lead_pref);
-    cur_class = new newClass(name, gender, score, stud_pref, lead_pref);
-    class_list[class_list.length] = cur_class;
-}
-
-function addStudent(req) {
-    var data = req.body;
-    if (data.name) 
+function setClasslist(class_data) {
+    for (var i = 0; i < class_data.length; ++i)
     {
-        var new_student = new Student(data.name, data.gender, 
-            data.score, data.first, data.second, data.third);
-        cur_class.classlist[cur_class.classlist.length] = new_student;
+        var id = class_data[i].id;
+        var gender = class_data[i].gender;
+        var score = class_data[i].score;
+        var first = class_data[i].first;
+        var second = class_data[i].second;
+        var third = class_data[i].third;
+        var presenter = class_data[i].presenter;
+        var group = class_data[i].group;
+        var locked = class_data[i].locked;
+        var student = new Student (id, gender, score, first, second, third, presenter, group, locked);
+        classlist[classlist.length] = student;
     }
 }
 
-function addGroupList(req) {
-    var data = req.body;
-    if (data.groupname) 
+function Group(id, presenter, count, deleted, preferred) {
+    this.id = id;
+    this.presenter = presenter;
+    this.count = count;
+    this.deleted = deleted;
+    this.preferred = preferred;
+}
+
+function setGrouplist(group_data) {
+    for (var i = 0; i < group_data.length; ++i)
     {
-        var new_group = new Group(data.groupname, data.leader, data.prefs, cur_class.grouplist.length);    
-        cur_class.grouplist[cur_class.grouplist.length] = new_group;
+        var id = group_data[i].id;
+        var presenter = group_data[i].presenter;
+        var count = group_data[i].count;
+        var deleted = group_data[i].deleted;
+        var preferred = group_data[i].preferred;
+        var group = new Group (id, presenter, count, deleted, preferred);
+        grouplist[grouplist.length] = group;
     }
 }
 
-function convertStudentPreferences() {
-    for (var i = 0; i < cur_class.classlist.length; ++i) 
-    {
-        cur_class.classlist[i].first = getGroupID(cur_class.classlist[i].first);
-        cur_class.classlist[i].second = getGroupID(cur_class.classlist[i].second);
-        cur_class.classlist[i].third = getGroupID(cur_class.classlist[i].third);
-    }
-    pref_set = true;
+function setSettings(settings_data) {
+    settings.gender = settings_data.gender;
+    settings.score = settings_data.score;
+    settings.stud_pref = settings_data.stud_pref;
+    settings.lead_pref = settings_data.lead_pref;
+    settings.lock_fems = settings_data.lock_fems;
+    settings.lock_pres = settings_data.lock_pres;
+    settings.lock_prefs = settings_data.lock_prefs;
+    settings.sec = settings_data.sec;
+    settings.thrd = settings_data.thrd;
 }
+// function updateSettings(req) {
+//     console.log(cur_class.gender);
+//     cur_class.classname = req.body.classname;
+//     //req.params.name = name;
+//     //var startDate = req.body.startDate;
+//     //var endDate = req.body.endDate;
+//     cur_class.gender = req.body.gender;
+//     cur_class.score = req.body.survey;
+//     cur_class.stud_pref = req.body.stud_pref;
+//     cur_class.lead_pref = req.body.lead_pref;
+//     console.log(cur_class.gender);
+//     console.log(cur_class.classname);
+//     //cur_class = new newClass(name, startDate, endDate, gender, score, stud_pref, lead_pref);
+//     // cur_class = new newClass(name, gender, score, stud_pref, lead_pref);
+//     // class_list[class_list.length] = cur_class;
+// }
+   
 
-function getGroupID(name) {
-    for (var i = 0; i < cur_class.grouplist.length; ++i) 
-    {
-        if (name == cur_class.grouplist[i].groupname) {
-            return cur_class.grouplist[i].id;
-        } 
-    }
-}
 
-function addDummyData() {
-    //function newClass(classname, gender, score, stud_pref, lead_pref)
-    cur_class.gender = true;
-    cur_class.score = true;
-    cur_class.stud_pref = true;
-    cur_class.lead_pref = true;
-    var group_names = ["Group 0", "Group 1", "Group 2", "Group 3", "Group 4"];
-    var pres_uniqs = ["lead0","lead1","lead2","lead3","lead4"];
-    var prefs = [["stud1","stud2"],[],[],["stud3"],[]];
-    var student_uniqs = ["lead0","lead1","lead2","lead3","lead4","stud1","stud2",
-    "stud3","stud4","stud5","stud6","stud7","stud8","stud9","stud10"];
-    for (var i = 0; i < group_names.length; ++i) //add groups
-    {
-        var new_group = new Group(group_names[i], pres_uniqs[i], prefs[i], i);
-        cur_class.grouplist[cur_class.grouplist.length] = new_group;
-    }
-    for (var i = 0; i < student_uniqs.length; ++i) //add students
-    {
-        var rand_gender = Math.floor(Math.random() * (2 - 0)); //random generate 0 or 1
-        var f_cut = Math.floor(Math.random() * (2 - 0)); //random generate 0 or 1
-        if (rand_gender && f_cut) rand_gender = "F";
-        else rand_gender = "M";
-        var rand_score = Math.floor(Math.random() * (21 - 0)); //random number [0,20]
-        var rand_first = Math.floor(Math.random() * (5 - 0)); //random number [0,16]
-        var rand_second = Math.floor(Math.random() * (5 - 0)); //random number [0,16]
-        while (rand_second == rand_first) {
-            rand_second = Math.floor(Math.random() * (5 - 0));
-        }
-        var rand_third = Math.floor(Math.random() * (5 - 0)); //random number [0,16]
-        while (rand_third == rand_second || rand_third == rand_first ) {
-            rand_third = Math.floor(Math.random() * (5 - 0));
-        }
-        var new_student = new Student(student_uniqs[i], rand_gender, 
-        rand_score, rand_first, rand_second, rand_third);
-        cur_class.classlist[cur_class.classlist.length] = new_student;
-    }
-    cur_class.classlist[cur_class.classlist.length] = new Student("stud11", "F", 
-        0);
-    cur_class.classlist[cur_class.classlist.length] = new Student("stud12", "M", 
-        15);
-}
+// function addClassName(req) {
+//     var name = req.body.newClass;
+//     req.params.name = name;
+//     //var startDate = req.body.startDate;
+//     //var endDate = req.body.endDate;
+//     var gender = req.body.gender;
+//     var score = req.body.survey;
+//     var stud_pref = req.body.stud_pref;
+//     var lead_pref = req.body.lead_pref;
+//     //cur_class = new newClass(name, startDate, endDate, gender, score, stud_pref, lead_pref);
+//     cur_class = new newClass(name, gender, score, stud_pref, lead_pref);
+//     class_list[class_list.length] = cur_class;
+// }
+
+// function addStudent(req) {
+//     var data = req.body;
+//     if (data.name) 
+//     {
+//         var new_student = new Student(data.name, data.gender, 
+//             data.score, data.first, data.second, data.third);
+//         cur_class.classlist[cur_class.classlist.length] = new_student;
+//     }
+// }
+
+// function addGroupList(req) {
+//     var data = req.body;
+//     if (data.groupname) 
+//     {
+//         var new_group = new Group(data.groupname, data.leader, data.prefs, cur_class.grouplist.length);    
+//         cur_class.grouplist[cur_class.grouplist.length] = new_group;
+//     }
+// }
+
+// function convertStudentPreferences() {
+//     for (var i = 0; i < cur_class.classlist.length; ++i) 
+//     {
+//         cur_class.classlist[i].first = getGroupID(cur_class.classlist[i].first);
+//         cur_class.classlist[i].second = getGroupID(cur_class.classlist[i].second);
+//         cur_class.classlist[i].third = getGroupID(cur_class.classlist[i].third);
+//     }
+//     pref_set = true;
+// }
+
+// function getGroupID(name) {
+//     for (var i = 0; i < cur_class.grouplist.length; ++i) 
+//     {
+//         if (name == cur_class.grouplist[i].groupname) {
+//             return cur_class.grouplist[i].id;
+//         } 
+//     }
+// }
+
+// function addDummyData() {
+//     //function newClass(classname, gender, score, stud_pref, lead_pref)
+//     cur_class.gender = true;
+//     cur_class.score = true;
+//     cur_class.stud_pref = true;
+//     cur_class.lead_pref = true;
+//     var group_names = ["Group 0", "Group 1", "Group 2", "Group 3", "Group 4"];
+//     var pres_uniqs = ["lead0","lead1","lead2","lead3","lead4"];
+//     var prefs = [["stud1","stud2"],[],[],["stud3"],[]];
+//     var student_uniqs = ["lead0","lead1","lead2","lead3","lead4","stud1","stud2",
+//     "stud3","stud4","stud5","stud6","stud7","stud8","stud9","stud10"];
+//     for (var i = 0; i < group_names.length; ++i) //add groups
+//     {
+//         var new_group = new Group(group_names[i], pres_uniqs[i], prefs[i], i);
+//         cur_class.grouplist[cur_class.grouplist.length] = new_group;
+//     }
+//     for (var i = 0; i < student_uniqs.length; ++i) //add students
+//     {
+//         var rand_gender = Math.floor(Math.random() * (2 - 0)); //random generate 0 or 1
+//         var f_cut = Math.floor(Math.random() * (2 - 0)); //random generate 0 or 1
+//         if (rand_gender && f_cut) rand_gender = "F";
+//         else rand_gender = "M";
+//         var rand_score = Math.floor(Math.random() * (21 - 0)); //random number [0,20]
+//         var rand_first = Math.floor(Math.random() * (5 - 0)); //random number [0,16]
+//         var rand_second = Math.floor(Math.random() * (5 - 0)); //random number [0,16]
+//         while (rand_second == rand_first) {
+//             rand_second = Math.floor(Math.random() * (5 - 0));
+//         }
+//         var rand_third = Math.floor(Math.random() * (5 - 0)); //random number [0,16]
+//         while (rand_third == rand_second || rand_third == rand_first ) {
+//             rand_third = Math.floor(Math.random() * (5 - 0));
+//         }
+//         var new_student = new Student(student_uniqs[i], rand_gender, 
+//         rand_score, rand_first, rand_second, rand_third);
+//         cur_class.classlist[cur_class.classlist.length] = new_student;
+//     }
+//     cur_class.classlist[cur_class.classlist.length] = new Student("stud11", "F", 
+//         0);
+//     cur_class.classlist[cur_class.classlist.length] = new Student("stud12", "M", 
+//         15);
+// }
 
 
 

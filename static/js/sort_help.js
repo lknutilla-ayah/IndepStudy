@@ -61,8 +61,9 @@ function updateCount(group) {
 }
 
 function changeColor(student_li) {
+    //console.log(student_li);
     var student = classlist[getClasslistIndex(student_li.id)];
-    var group = student_li.parentNode.id;
+    //console.log(student);
     var first = document.getElementById("first_" + student.id);
     var second = document.getElementById("second_" + student.id);
     var third = document.getElementById("third_" + student.id);

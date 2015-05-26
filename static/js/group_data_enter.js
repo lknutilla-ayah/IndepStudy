@@ -1,7 +1,7 @@
 var num_pref = 1;
 
 function createGCols() {
-    gcols = [{data: 'groupname'}, {data: 'presenter'}];
+    gcols = [{data: 'id'}, {data: 'presenter'}];
     gcolH = ['GROUP NAME', 'PROPORSAL PRESENTER'];
 };
 createGCols();
@@ -51,7 +51,6 @@ $("#sub_pref").click(function(){
 
 group_HT = new Handsontable(group_container, {
   data: [],
-  dataSchema: {groupname: null, uniqname: null},
   colHeaders: gcolH,
   columns: gcols,
   stretchH: 'all',

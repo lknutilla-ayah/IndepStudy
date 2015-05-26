@@ -2,10 +2,8 @@ var
   stud_container = document.getElementById('students_enter'),
   group_container = document.getElementById('groups_enter'),
   cols, colH, gcols, gcolH,
-  jsondataStudent, jsondataGroup,
   student_HT, group_HT,
-  classlist = [],
-  grouplist = [],
+  classlist = [], grouplist = [], settings = {},
   group_max, group_min, group_avg;
 
 stud_container.style.width = '100%';
@@ -13,20 +11,34 @@ stud_container.style.overflow = "scroll";
 group_container.style.width = '100%';
 group_container.style.overflow = "scroll";
 
+
+$('#upload_settings').click(function() { 
+  settings.gender = $('#gender').prop("checked");
+  settings.score = $('#score').prop("checked");
+  settings.stud_pref = $('#stud_pref').prop("checked");
+  settings.lead_pref = $('#lead_pref').prop("checked");
+  settings.lock_fems = $('#lock_fems').prop("checked");
+  settings.lock_pres = $('#lock_pres').prop("checked");
+  settings.lock_prefs = $('#lock_prefs').prop("checked");
+  settings.sec = $('#2nd').prop("checked");
+  settings.thrd = $('#3rd').prop("checked");
+});
+
 $('#upload').click(function() {
   $('#grp_tbl').empty();
   $('.student').remove();
+  var student_data = student_HT.getData();
+  var group_data = group_HT.getData();
   if (classlist.length === 0) {
-    uploadClass();
+    console.log("upload");
+    uploadClass(student_data, group_data);
   }
   else {
-    updateClass();
+    console.log("update");
+    updateClass(student_data, group_data);
   }
   uploadGroupData();
   uploadStudentData();
-  
-  console.log(grouplist);
-  console.log(classlist);
 
   var available_groups = grouplist.filter(function(obj)
             {return !obj.deleted});
@@ -35,10 +47,9 @@ $('#upload').click(function() {
   group_min = group_avg -1;
 
   uploadSortable();
-  console.log("tutorial: " + tutorial);
   if (tutorial === "false")
   {
-    console.log("server");
+    $("#upload_settings").trigger("click"); 
     sendDataToServer();
   }
 
@@ -129,6 +140,7 @@ function uploadGroupData() {
 function uploadStudentData() {
   for (var i = 0; i < classlist.length; ++i)
   {
+    if (classlist[i].id === null) continue;
     var student = document.createElement("LI");
     student.className += "ui-state-default list-group-item student";
     student.id = classlist[i].id;
@@ -139,10 +151,11 @@ function uploadStudentData() {
     student_lock.onclick = function(event) { lock(this); };
     $(student).append(student_lock);
     $(student).append(" " + classlist[i].id + " ");
-    if ($('#gender').prop("checked")) $(student).append(classlist[i].gender + " ");
-    if ($('#score').prop("checked")) $(student).append(classlist[i].score + " ");
+    if ($('#gender').prop("checked")) $(student).append("M/F: " + classlist[i].gender + " ");
+    if ($('#score').prop("checked")) $(student).append("Score: " +classlist[i].score + " ");
     if ($('#stud_pref').prop("checked")) 
     {
+        $(student).append("Prefs:");
         var first_pref = grouplist.map(function(obj) 
           {return obj.id; }).indexOf(classlist[i].first);
         if (first_pref != -1)
@@ -164,37 +177,38 @@ function uploadStudentData() {
     }
     var group_ul = document.getElementById(classlist[i].group);
     $(group_ul).append(student);
-    changeColor(student);
+    if (student.id) changeColor(student);
     checkLocks(classlist[i]);
   }
 }
 
-function uploadClass() 
+function uploadClass(student_data, group_data) 
 {
-  var student_data = student_HT.getData();
-  var group_data = group_HT.getData();
   for (var i = 0; i < student_data.length-1; ++i)
   {
-    if (!student_data[i].uniqname) continue;
+    console.log(student_data[i]);
+
+    if (!student_data[i].id) continue;
     var student = new Student(student_data[i]);
     classlist[classlist.length] = student;
   }
   for (var i = 0; i < group_data.length-1; ++i)
   {
-    if (!group_data[i].groupname) continue;
+    console.log(group_data[i]);
+    if (!group_data[i].id) continue;
     var group = new Group(group_data[i]);
     grouplist[grouplist.length] = group;
   }
 }
 
-function updateClass() 
+function updateClass(student_data, group_data) 
 {
-  var student_data = student_HT.getData();
-  var group_data = group_HT.getData();
   for (var i = 0; i < student_data.length-1; ++i)
   {
+    console.log(student_data[i]);
     var inClass = classlist.map(function(obj) 
-        {return obj.id; }).indexOf(student_data[i].uniqname);
+        {return obj.id; }).indexOf(student_data[i].id);
+    console.log(inClass);
     if (inClass != -1)//in class
     {
       var student = classlist[inClass];
@@ -202,14 +216,14 @@ function updateClass()
       if ($('#score').prop("checked")) student.score = student_data[i].score;
       if ($('#stud_pref').prop("checked"))
       {
-        if (student_data[i].first != undefined ) student.first = "Group " + student_data[i].first;
-        if (student_data[i].second != undefined ) student.second = "Group " + student_data[i].second;
-        if (student_data[i].third != undefined ) student.third = "Group " + student_data[i].third;
+        if (student_data[i].first != undefined ) student.first = student_data[i].first;
+        if (student_data[i].second != undefined ) student.second = student_data[i].second;
+        if (student_data[i].third != undefined ) student.third = student_data[i].third;
       }
     }
     else
     {
-      if (!student_data[i].uniqname) continue;
+      if (!student_data[i].id || student_data[i].id === null) continue;
       var student = new Student(student_data[i]);
       classlist[classlist.length] = student;
     }
@@ -217,7 +231,7 @@ function updateClass()
   for (var i = 0; i < group_data.length-1; ++i)
   {
     var inGroup = grouplist.map(function(obj) 
-        {return obj.id; }).indexOf(group_data[i].groupname);
+        {return obj.id; }).indexOf(group_data[i].id);
     if (inGroup != -1)//in class
     {
       var group = grouplist[inGroup];
@@ -243,14 +257,14 @@ function updateClass()
 
 function Student(data)
 {
-  this.id = data.uniqname;
+  this.id = data.id;
   if ($('#gender').prop("checked")) this.gender = data.gender;
   if ($('#score').prop("checked")) this.score = data.score;
   if ($('#stud_pref').prop("checked"))
   {
-    if (data.first != undefined && data.first != "") this.first = "Group " + data.first;
-    if (data.second != undefined && data.second != "") this.second = "Group " + data.second;
-    if (data.third != undefined && data.third != "") this.third = "Group " + data.third;
+    if (data.first != undefined && data.first != "") this.first = data.first;
+    if (data.second != undefined && data.second != "") this.second = data.second;
+    if (data.third != undefined && data.third != "") this.third = data.third;
   }
   this.presenter = -1;
   this.group = "sortable_class";
@@ -259,7 +273,7 @@ function Student(data)
 
 function Group(data)
 {
-  this.id = "Group " + data.groupname;
+  this.id = data.id;
   this.presenter = data.presenter;
   var pres_index = classlist.map(function(obj) 
       {return obj.id; }).indexOf(this.presenter);
@@ -273,113 +287,6 @@ function Group(data)
     this.preferred[this.preferred.length] = data["preference_"+i];
   }
 }
-
-// $('#upload').click(function() {
-//   var s_row_cnt = student_HT.countRows();
-//   var g_row_cnt = group_HT.countRows();
-//   for (var i = 0; i < s_row_cnt-1; ++i) //accounts for spare row
-//   {
-//     var data = student_HT.getDataAtRow(i);
-//     if (data[0] === null) continue;
-//     fillJSONStudent(data,i);
-//     $.ajax({
-//         url: '/upload', // Location of the service
-//         type: 'POST', //GET or POST or PUT or DELETE verb
-//         data: jsondataStudent, //Data sent to server
-//         contentType: 'application/json',
-//         processdata: true, //True or False
-//         crossDomain: true,
-//         error: ServiceFailed  // When Service call fails
-//     });
-//   }
-//   for (var i = 0; i < g_row_cnt-1; ++i) //accounts for spare row
-//   {
-//     var data = group_HT.getDataAtRow(i);
-//     if (data[0] === null) continue;
-//     fillJSONGroup(data);
-//     $.ajax({
-//         url: '/upload', // Location of the service
-//         type: 'POST', //GET or POST or PUT or DELETE verb
-//         data: jsondataGroup, //Data sent to server
-//         contentType: 'application/json',
-//         processdata: true, //True or False
-//         crossDomain: true,
-//         error: ServiceFailed  // When Service call fails
-//     });
-//   }
-//   submitData();
-// });
-
-// function submitData() {
-//   $.ajax({
-//     url: '/upload', // Location of the service
-//     type: 'POST', //GET or POST or PUT or DELETE verb
-//     data: JSON.stringify({class_data: student_HT.getData(), group_data: group_HT.getData(), 
-//       student: false, group: false}),
-//     contentType: 'application/json',
-//     processdata: true, //True or False
-//     crossDomain: true,
-//     dataType: 'json', //Expected data format from server
-//     success: function(data) {
-//      window.location = data;
-//     },
-//     error: ServiceFailed  // When Service call fails
-//   });
-// }
-
-
-// function fillJSONStudent(data) {
-//   var name = data[0];
-//   var var_cnt = 1;
-//   if (gender) {
-//     var gen = data[var_cnt]; ++var_cnt;
-//   }
-//   if (score) var scr = data[var_cnt]; ++var_cnt;
-//   if (stud_pref) {
-//     var first = data[var_cnt]; ++var_cnt;
-//     var second = data[var_cnt]; ++var_cnt;
-//     var third = data[var_cnt]; ++var_cnt;
-//   }
-//   jsondataStudent = JSON.stringify({name: name, gender: gen, score: scr, 
-//      first: first, second: second, third: third, student: true, group: false});
-// }
-
-// function fillJSONGroup(data)
-// {
-//   var groupname = data[0];
-//   var lead = data[1];
-//   if (lead_pref) {
-//     var lead_prefs = [];
-//     for (var i = 2; i <= num_pref+1; ++i) //accounting for data start at idx 2
-//     {
-//       if (data[i] != null) lead_prefs[lead_prefs.length] = data[i];
-//     }
-//   }
-//   jsondataGroup = JSON.stringify({groupname: groupname, leader: lead, prefs: lead_prefs, student: false, group: true});
-// }
-
-// Handsontable.Dom.addEvent(load, 'click', function() {
-//   ajax('json/load.json', 'GET', '', function(res) {
-//     var data = JSON.parse(res.response);
-
-//     hot.loadData(data.data);
-//     exampleConsole.innerText = 'Data loaded';
-//   });
-// });
-
-// Handsontable.Dom.addEvent(save, 'click', function() {
-//   // save all cell's data
-//   ajax('json/save.json', 'GET', JSON.stringify({data: hot.getData()}), function (res) {
-//     var response = JSON.parse(res.response);
-
-//     if (response.result === 'ok') {
-//       exampleConsole.innerText = 'Data saved';
-//     }
-//     else {
-//       exampleConsole.innerText = 'Save error';
-//     }
-//   });
-// });
 
 
 

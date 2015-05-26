@@ -1,3 +1,4 @@
+
 /*----CLASS LIST FUNCTIONS----*/
 
 /*Description:Sorts students into their first choice, and gives the sorter
@@ -119,7 +120,7 @@ function addNewMember(group_btn)
     if (group_data.count >= group_max)
     {
         var adding = confirm("WARNING: " + group_ul.id + " is larger than the max group size ("
-            + group_max +"). Cannot add member.");
+            + group_max +"). Would you still like to add a member?");
         if (adding === false) return;
     }
     sortGroupH2L(grouplist,'count');
@@ -175,7 +176,8 @@ function removeMember(group_btn)
     if (members.length <= group_min)
     {
         var removing = confirm("WARNING: " + group_ul.id +
-         " is smaller than the min group size ("+ group_min +").");
+            " is smaller than the min group size ("+ group_min +
+            "). Would you still like to remove a member?");
         if (removing === false) return;
     }
     if ($('#score').prop("checked")) sortGroupL2H(members,'score');

@@ -1,6 +1,6 @@
 
 function createCols() {
-  cols = [{data: 'uniqname'}];
+  cols = [{data: 'id'}];
   colH = ['UNIQNAME']; 
 };
 createCols();
@@ -68,7 +68,6 @@ $('#stud_pref').click(function() {
 
 student_HT = new Handsontable(stud_container, {
   data: [],
-  dataSchema: {uniqname: null, gender: null, score: null},
   colHeaders: colH,
   columns: cols,
   stretchH: 'all',

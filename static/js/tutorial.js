@@ -4,7 +4,9 @@ $(document).ready( function() {
     $('#stud_pref').prop('checked', true);
     $('#lead_pref').prop('checked', true); 
 
-    $("#upload").trigger("click");   
+    $("#upload").trigger("click");
+    $("#save").addClass("disabled");
+    $("#print").addClass("disabled");  
 })
     var num_pref = 2;
     var group_array = [

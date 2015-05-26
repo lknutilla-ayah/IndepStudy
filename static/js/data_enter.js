@@ -30,11 +30,9 @@ $('#upload').click(function() {
   var student_data = student_HT.getData();
   var group_data = group_HT.getData();
   if (classlist.length === 0) {
-    console.log("upload");
     uploadClass(student_data, group_data);
   }
   else {
-    console.log("update");
     updateClass(student_data, group_data);
   }
   uploadGroupData();
@@ -186,7 +184,6 @@ function uploadClass(student_data, group_data)
 {
   for (var i = 0; i < student_data.length-1; ++i)
   {
-    console.log(student_data[i]);
 
     if (!student_data[i].id) continue;
     var student = new Student(student_data[i]);
@@ -194,7 +191,6 @@ function uploadClass(student_data, group_data)
   }
   for (var i = 0; i < group_data.length-1; ++i)
   {
-    console.log(group_data[i]);
     if (!group_data[i].id) continue;
     var group = new Group(group_data[i]);
     grouplist[grouplist.length] = group;
@@ -205,10 +201,8 @@ function updateClass(student_data, group_data)
 {
   for (var i = 0; i < student_data.length-1; ++i)
   {
-    console.log(student_data[i]);
     var inClass = classlist.map(function(obj) 
         {return obj.id; }).indexOf(student_data[i].id);
-    console.log(inClass);
     if (inClass != -1)//in class
     {
       var student = classlist[inClass];

@@ -13,6 +13,7 @@ function addStudentFromList(student) {
     ul_group.appendChild(student_li);
     changeColor(student_li);
     updateCount(ul_group);
+    checkLocks(student);
 }
 
 function addMember(student_li, new_grp, old_grp) {
@@ -21,6 +22,7 @@ function addMember(student_li, new_grp, old_grp) {
     if (old_grp.id != "sortable_class") updateCount(old_grp);
     if (new_grp.id != "sortable_class") updateCount(new_grp);
     changeColor(student_li);
+    checkLocks(classlist[getClasslistIndex(student_li.id)]);
 }
 
 function sortGroupL2H(list,attr) {
@@ -86,9 +88,13 @@ function changeColor(student_li) {
             first.style.color = "black";
         }
         else {
-            if (first) first.style.color = "red";
-            if (second) second.style.color = "red";
-            if (third) third.style.color = "red";
+            if (first) first.style.color = "black";
+            if (second) second.style.color = "black";
+            if (third) third.style.color = "black";
         }
+    }
+    if ($('#lock_pres').prop("checked"))
+    {
+        if (student.presenter === student.group) $(student_li).removeClass("pres_danger");
     }
 }

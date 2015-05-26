@@ -27,6 +27,18 @@ body {
     background-color: #FFF2FF;
 }
 
+.pres_danger {
+    background-color: #D0A1A1;
+}
+
+.student {
+    cursor:default;
+}
+
+.dropdown {
+    cursor:default;
+}
+
 #sortable_class {
     min-height: 50px;
     padding-bottom: 50px;

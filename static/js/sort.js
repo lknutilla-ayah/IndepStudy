@@ -1,23 +1,7 @@
 //global variables
-    var lock_fems = false, lock_pres = false, lock_prefs = false;
 
 $(document).ready( function() {
-    $("#grp_range").ionRangeSlider({
-        type: "double",
-        min: 0,
-        max: 7,
-        from: 3,
-        to: 5,
-        onStart: function (data) {
-            //not sure if this will work?
-            data.from = group_min;
-            data.to = group_max;
-        },
-        onChange: function (data) {
-            group_min = data.from;
-            group_max = data.to;
-        }
-    });
+
 })
 
 

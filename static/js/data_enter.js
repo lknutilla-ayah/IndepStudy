@@ -18,15 +18,14 @@ group_container.style.width = '100%';
 group_container.style.overflow = "scroll";
 
 $('#upload').click(function() {
-  //bug when uploading a blank student, puts their preference in as groupsize+1 instead of omitting labels
   //put in alert that data will be lost or handle case
-  classlist = [];
-  grouplist = [];
   $('#grp_tbl').empty();
   $('.student').remove();
-  uploadClass();
+  if (classlist.length === 0) uploadClass();
+  else updateClass();
   uploadGroupData();
   uploadStudentData();
+  
   console.log(grouplist);
   console.log(classlist);
 
@@ -54,6 +53,7 @@ function uploadSortable()
               if (new_grp.id != "sortable_class") updateCount(new_grp);
               classlist[getClasslistIndex(student.id)].group = new_grp.id;
               changeColor(student);
+              checkLocks(classlist[getClasslistIndex(student.id)]);
           }
       }
   });
@@ -161,7 +161,10 @@ function uploadStudentData() {
           $(student).append('<label for="'+ student.id +'" id="third_'+ student.id +'">'+ third_pref +'</label>');
         }
     }
-    $('#sortable_class').append(student);
+    var group_ul = document.getElementById(classlist[i].group);
+    $(group_ul).append(student);
+    changeColor(student);
+    checkLocks(classlist[i]);
   }
 }
 
@@ -172,7 +175,7 @@ function uploadClass()
   for (var i = 0; i < student_data.length-1; ++i)
   {
     if (!student_data[i].uniqname) continue;
-    var student = new Student(student_data[i],i);
+    var student = new Student(student_data[i]);
     classlist[classlist.length] = student;
   }
   for (var i = 0; i < group_data.length-1; ++i)
@@ -183,18 +186,70 @@ function uploadClass()
   }
 }
 
-function Student(data, idx)
+function updateClass() 
 {
-  // this.id = idx;
-  // this.uniqname = data.uniqname;
+  var student_data = student_HT.getData();
+  var group_data = group_HT.getData();
+  for (var i = 0; i < student_data.length-1; ++i)
+  {
+    var inClass = classlist.map(function(obj) 
+        {return obj.id; }).indexOf(student_data[i].uniqname);
+    if (inClass != -1)//in class
+    {
+      var student = classlist[inClass];
+      if ($('#gender').prop("checked")) student.gender = student_data[i].gender;
+      if ($('#score').prop("checked")) student.score = student_data[i].score;
+      if ($('#stud_pref').prop("checked"))
+      {
+        if (student_data[i].first != undefined ) student.first = student_data[i].first;
+        if (student_data[i].second != undefined ) student.second = student_data[i].second;
+        if (student_data[i].third != undefined ) student.third = student_data[i].third;
+      }
+    }
+    else
+    {
+      if (!student_data[i].uniqname) continue;
+      var student = new Student(student_data[i]);
+      classlist[classlist.length] = student;
+    }
+  }
+  for (var i = 0; i < group_data.length-1; ++i)
+  {
+    var inGroup = grouplist.map(function(obj) 
+        {return obj.id; }).indexOf(group_data[i].groupname);
+    if (inGroup != -1)//in class
+    {
+      var group = grouplist[inGroup];
+      group.presenter = group_data[i].presenter;
+      var pres_index = classlist.map(function(obj) 
+          {return obj.id; }).indexOf(group.presenter);
+      classlist[pres_index].presenter = group.id;
+      group.preferred = [];
+      for (var j = 1; j < num_pref; ++j)
+      {
+        if (group_data[i]["preference_"+j] === undefined ) continue;
+        group.preferred[group.preferred.length] = group_data[i]["preference_"+j];
+      }
+    }
+    else
+    {
+      if (!group_data[i].groupname) continue;
+      var group = new Group(group_data[i]);
+      grouplist[grouplist.length] = group;
+    }
+  }
+}
+
+function Student(data)
+{
   this.id = data.uniqname;
   if ($('#gender').prop("checked")) this.gender = data.gender;
   if ($('#score').prop("checked")) this.score = data.score;
   if ($('#stud_pref').prop("checked"))
   {
-    this.first = data.first;
-    this.second = data.second;
-    this.third = data.third;
+    if (data.first != undefined ) this.first = data.first;
+    if (data.second != undefined ) this.second = data.second;
+    if (data.third != undefined ) this.third = data.third;
   }
   this.presenter = -1;
   this.group = "sortable_class";
@@ -210,11 +265,11 @@ function Group(data)
   classlist[pres_index].presenter = this.id;
   this.count = 0;
   this.deleted = false;
-  this.preferred_team = [];
+  this.preferred = [];
   for (var i = 1; i < num_pref; ++i)
   {
-    if (data["preference_"+i] === undefined) continue;
-    this.preferred_team[this.preferred_team.length] = data["preference_"+i];
+    if (data["preference_"+i] === undefined ) continue;
+    this.preferred[this.preferred.length] = data["preference_"+i];
   }
 }
 

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>{{ title }} | Sorting Hat</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.icon-large.css" >
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    {{ header|safe }}
+    <div class="container">
+      <h3>{{ heading }}</h3>
+       <div class="col-md-9">
+          <div class="row-fluid">
+            <label for="grp_tbl">Groups</label>
+            <table class="table table-bordered white_back" id="print_tbl"></table>
+          </div>
+          <div class="col-md-9">
+          <div class="row-fluid">
+            <label for="grp_tbl">Stats</label>
+            <table class="table table-bordered white_back" id="stat_tbl"></table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="jquery-1.11.2.min.js"></script>
+    <script src="jquery-ui.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="js/print.js"></script>
+  </body>
+</html>

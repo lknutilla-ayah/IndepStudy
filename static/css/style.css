@@ -1,5 +1,5 @@
 body {
-    padding-top: 1%;
+    padding-top: 5%;
     position: relative;
 }
 
@@ -39,8 +39,16 @@ body {
     cursor:default;
 }
 
+.groupheader {
+    background-color: #A3E0FF; 
+}
+
 .preference {
     padding-left: 5px;
+}
+
+.white_back {
+    background-color: white;
 }
 
 #sortable_class {

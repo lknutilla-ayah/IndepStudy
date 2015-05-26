@@ -77,6 +77,13 @@ app.get('/classinfo', function (req, res) {
     res.send(class_info);
 });
 
+app.get('/print', function (req, res) {
+    res.render('print_tpl', { 
+        title: 'Print and Stats',
+        tutorial: false
+    });
+});
+
 
 app.get('/tutorial', function (req, res) {
     //addDummyData();

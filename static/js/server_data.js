@@ -85,6 +85,11 @@ $('#save').click(function() {
     sendDataToServer();
 });
 
+$('#print').click(function() {
+    $("#upload_settings").trigger("click"); 
+    sendDataToServer();
+});
+
 function sendDataToServer() {
   $.ajax({
         url: '/sortinghat', // Location of the service

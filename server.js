@@ -14,6 +14,10 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 var classlist = [];
 var grouplist = [];
 var settings = {};
+var username = 'eecsuser';
+var password = 'password4eecs';
+var incorrect_auth = false;
+var authenticated = false;
 
 //define templates//
 var header_tpl = swig.compileFile('views/header.html');
@@ -49,19 +53,39 @@ swig.setDefaults({ cache: false });
 //     });
 // });
 
+
 app.get('/', function (req, res) {
     res.render('index', { 
         title: 'Login',
         heading: 'Login',
-        password: 'password4eecs'
+        incorrect: incorrect_auth
     });
 });
 
+app.post('/', function (req, res) {
+    if (req.body.username === username
+        && req.body.password === password) {
+        authTimeout();
+        authenticated = true;
+        var site = '/sortinghat';
+    }
+    else {
+        incorrect_auth = true;
+        var site = '/';
+    }
+    res.header('Content-Length', site.length);
+    res.send(site);
+});
+
 app.get('/sortinghat', function (req, res) {
-    res.render('new_class_tpl', { 
-        title: 'Create New Class',
-        tutorial: false
-    });
+    if (authenticated)
+    {
+        res.render('new_class_tpl', { 
+            title: 'Create New Class',
+            tutorial: false
+        });
+    }
+    else res.redirect('/');
 });
 
 app.post('/sortinghat', function (req, res) {
@@ -78,10 +102,13 @@ app.get('/classinfo', function (req, res) {
 });
 
 app.get('/print', function (req, res) {
-    res.render('print_tpl', { 
-        title: 'Print and Stats',
-        tutorial: false
-    });
+    if (authenticated) {
+        res.render('print_tpl', { 
+            title: 'Print and Stats',
+            tutorial: false
+        });
+    }
+    else res.redirect('/');
 });
 
 
@@ -166,6 +193,10 @@ function setSettings(settings_data) {
     settings.lock_prefs = settings_data.lock_prefs;
     settings.sec = settings_data.sec;
     settings.thrd = settings_data.thrd;
+}
+
+function authTimeout() {
+    setTimeout(function(){ authenticated = false; }, 10800000);
 }
 // function updateSettings(req) {
 //     console.log(cur_class.gender);

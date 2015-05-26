@@ -4,22 +4,60 @@
     <title>{{ title }} | Sorting Hat</title>
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="/bootstrap/css/bootstrap-switch.min.css" >
+    <style>
+      body {
+          padding-top: 10%;
+          position: relative;
+      }
+    </style>
   </head>
   <body>
   <script>
     var password = "{{ password }}";
   </script>
     <div class="container">
-      <div class="jumbotron">
-        <h2>Welcome to the Group Sorting Hat!</h2>
-        <p id="incorrect"></p>
-        <form class="navbar-form navbar-left" role="login">
-          <div class="form-group" id="pass_form">
-            <label for="enter_password">Password</label>
-            <input type="password" class="form-control" id="enter_password" placeholder="Password">
-          </div>
-          <button type="submit" class="btn btn-default" id="login">Login</button>
-        </form>
+      <header>
+        <div class="container-fluid">
+          <nav class="navbar navbar-default navbar-fixed-top">
+            <!--<div class="container-fluid">-->
+              <div class="navbar-header" id="sort-hat-navigation">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Team Sorting Hat</a>
+              </div>
+              <div class="collapse navbar-collapse" id="sort-hat-nav">
+                <ul class="nav navbar-nav navbar-right">
+                  <li><a href="/tutorial">Example Class</a></li>
+                </ul>
+              </div>
+            <!--</div>-->
+          </nav> 
+        </div>
+      </header>
+      <div class="panel panel-default">
+            <div class="panel-heading">
+            <h1 class="panel-title">Welcome to the Group Sorting Hat!</h1>
+            </div>
+            <div class="panel-body">
+              <div class="row-fluid"> 
+                {% if incorrect %}              
+                  <p id="incorrect" color="red">Username or password are incorrect.</p>
+                {% endif %}
+                <div class="form-group" id="user_form">
+                  <label for="enter_username">Username</label>
+                  <input type="text" class="form-control" id="enter_username" placeholder="Username">
+                </div>
+                <div class="form-group" id="pass_form">
+                  <label for="enter_password">Password</label>
+                  <input type="password" class="form-control" id="enter_password" placeholder="Password">
+                </div>
+                <button type="button" class="btn btn-default" id="login">Login</button>
+              </div>
+            </div>
       </div>
     </div>
 

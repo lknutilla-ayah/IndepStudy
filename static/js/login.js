@@ -1,14 +1,15 @@
 $('#login').click(function() {
-    var pass_entry = document.getElementById("enter_password").innerHTML;
-    if (pass_entry === password)
-    {
-        //Go link to something
-    }
-    else
-    {
-        pass_entry = "";
-        $('#pass_form').addClass("has-error");
-        document.getElementById("incorrect").style.color = 'red';
-        document.getElementById("incorrect").innerHTML = "Password incorrect";
-    }
-}
+    var username = $('#enter_username').val();
+    var password = $('#enter_password').val();
+    $.ajax({
+        url: '/', // Location of the service
+        type: 'POST', //GET or POST or PUT or DELETE verb
+        data: JSON.stringify({username: username, password: password}), //Data sent to server
+        contentType: 'application/json',
+        processdata: true, //True or False
+        crossDomain: true,
+        success: function(data) {
+         window.location = data;
+        }
+    });
+});

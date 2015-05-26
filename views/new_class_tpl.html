@@ -107,8 +107,8 @@ var tutorial = "{{ tutorial }}";
                     <li class="dropdown" id="class-fn">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Student Sort<span class="caret"></span></a>
                       <ul class="dropdown-menu" role="menu">
-                        <li><a id="srt_fem">Sort Females</a></li>
-                        <li><a id="sort_frst">Sort by Top Preference</a></li>
+                        <li><a id="srt_fem">Sort Females into Top Preferences</a></li>
+                        <li><a id="sort_frst">Sort All Students into Top Preference</a></li>
                         <li role="presentation" class="divider"></li>
                         <li><a id="srt_non">Sort Remaining Students in Class List into Smallest Groups</a></li>
                         <li><a id="restart">Clear Groups (Start Over)</a></li>
@@ -118,16 +118,16 @@ var tutorial = "{{ tutorial }}";
                     <li class="dropdown">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" data-placeholder="false">Group Sort<span class="caret"></span></a>
                       <ul class="dropdown-menu" role="menu">
-                        <li><a id="ordr_scr" >Sort Groups by Score</a></li>
+                        <li><a id="ordr_scr" >Sort Groups by Score (High to Low)</a></li>
                         <li role="presentation" class="divider"></li>
                         <li role="presentation" class="dropdown-header">Add/Remove Students by:</li>
                         <li><input type="checkbox" name="2nd" id="2nd" checked><label for="2nd">2nd Choice</label></li>
                         <li><input type="checkbox" name="3rd" id="3rd"><label for="3rd">3rd Choice</label></li>
                         <li role="presentation" class="divider"></li>
-                        <li role="presentation" class="dropdown-header">Locks</li>
+                        <li role="presentation" class="dropdown-header">Locks:</li>
+                        <li><input type="checkbox" name="lock_fems" id="lock_fems"><label for="lock_fems">Lock Females</label></li>
                         <li><input type="checkbox" name="lock_pres" id="lock_pres"><label for="lock_pres">Lock Presenters</label></li>
                         <li><input type="checkbox" name="lock_prefs" id="lock_prefs"><label for="lock_prefs">Lock Presenter Preferences</label></li>
-                        <li><input type="checkbox" name="lock_fems" id="lock_fems"><label for="lock_fems">Lock Females</label></li>
                       </ul>
                     </li>
                     <li><a href="#class-sort"><button id ="save" type="button" class="btn btn-default">Save</button></a></li>

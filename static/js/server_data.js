@@ -1,7 +1,15 @@
 $(document).ready( function() {
     $.get("/classinfo",function(data, status) {
-        if (data.classlist.length != 0) classlist = data.classlist;
-        if (data.grouplist.length != 0) grouplist = data.grouplist;
+        for (var i = 0; i < data.classlist.length; ++i)
+        {
+            if (data.classlist[i].id === null) continue;
+            classlist[classlist.length] = data.classlist[i];
+        }
+        for (var i = 0; i < data.grouplist.length; ++i)
+        {
+            if (data.grouplist[i].id === null) continue;
+            grouplist[grouplist.length] = data.grouplist[i];
+        }
         if (data.settings) {
             settings = data.settings;
             $('#gender').prop('checked', data.settings.gender);
@@ -49,12 +57,18 @@ $(document).ready( function() {
         }
         $('#grp_tbl').empty();
         $('.student').remove();
+        repopulateHT(data.classlist, data.grouplist, data.settings);
         uploadGroupData();
         uploadStudentData();
-        repopulateHT(data.classlist, data.grouplist, data.settings);
-        uploadSortable();
-    });
-            
+
+        var available_groups = grouplist.filter(function(obj)
+                {return !obj.deleted});
+        group_avg = Math.ceil((classlist.length)/(available_groups.length));
+        group_max = group_avg +1;
+        group_min = group_avg -1;
+
+        uploadSortable();   
+    });         
 })
 
 function repopulateHT(class_data, group_data, settings_data)
@@ -81,7 +95,8 @@ function repopulateHT(class_data, group_data, settings_data)
 }
 
 $('#save').click(function() {
-    $("#upload_settings").trigger("click"); 
+    $("#upload_settings").trigger("click");
+    console.log(classlist); 
     sendDataToServer();
 });
 
@@ -91,6 +106,7 @@ $('#print').click(function() {
 });
 
 function sendDataToServer() {
+    console.log("posting");
   $.ajax({
         url: '/sortinghat', // Location of the service
         type: 'POST', //GET or POST or PUT or DELETE verb

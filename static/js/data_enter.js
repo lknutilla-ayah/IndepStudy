@@ -29,15 +29,9 @@ $('#upload').click(function() {
   $('.student').remove();
   var student_data = student_HT.getData();
   var group_data = group_HT.getData();
-  classlist = [];
-  grouplist = [];
   uploadClass(student_data, group_data);
-  // if (classlist.length === 0) {
-  //   uploadClass(student_data, group_data);
-  // }
-  // else {
-  //   updateClass(student_data, group_data);
-  // }
+  console.log(classlist);
+  console.log(grouplist);
   uploadGroupData();
   uploadStudentData();
 
@@ -82,6 +76,7 @@ function uploadGroupData() {
   var count = 0;
   while (count < grouplist.length)
   {
+    if (!grouplist[count]) continue;
     var tr = document.createElement("TR");
     for (var i = 0; i < 3 && count < grouplist.length; ++i)
     {
@@ -90,7 +85,10 @@ function uploadGroupData() {
       group_obj.id = "obj_"+grouplist[count].id;
       $(group_obj).append(count + ".) ");
       $(group_obj).append(grouplist[count].id + " ");
-      $(group_obj).append(grouplist[count].presenter + " ");
+      if (grouplist[count].presenter)
+      {
+        $(group_obj).append(grouplist[count].presenter + " ");
+      }
       var group_size = document.createElement("INPUT");
         group_size.className += "grp_sz_box";
         group_size.id = "gcount_" + grouplist[count].id;
@@ -141,147 +139,166 @@ function uploadGroupData() {
 function uploadStudentData() {
   for (var i = 0; i < classlist.length; ++i)
   {
-    if (classlist[i].id === null) continue;
+    if (!classlist[i]) continue;
     var student = document.createElement("LI");
     student.className += "ui-state-default list-group-item student";
     student.id = classlist[i].id;
+
     var student_lock = document.createElement("BUTTON");
     student_lock.className += "btn btn-default btn-xs lock";
     student_lock.id = "lock_" + student.id;
     $(student_lock).append('<span class="glyphicon glyphicon-lock" aria-hidden="true"></span>');
     student_lock.onclick = function(event) { lock(this); };
     $(student).append(student_lock);
+
     $(student).append(" " + classlist[i].id + " ");
-    if ($('#gender').prop("checked")) $(student).append("M/F: " + classlist[i].gender + " ");
-    if ($('#score').prop("checked")) $(student).append("Score: " +classlist[i].score + " ");
-    if ($('#stud_pref').prop("checked")) 
+    if ($('#gender').prop("checked") && classlist[i].gender) $(student).append("M/F: " + classlist[i].gender + " ");
+    if ($('#score').prop("checked") && classlist[i].score) $(student).append("Score: " +classlist[i].score + " ");
+    if ($('#stud_pref').prop("checked") && (classlist[i].first || classlist[i].second || classlist[i].third)) 
     {
         $(student).append("Prefs:");
-        var first_pref = grouplist.map(function(obj) 
+        if (classlist[i].first)
+        {
+          var first_pref = grouplist.map(function(obj) 
           {return obj.id; }).indexOf(classlist[i].first);
-        if (first_pref != -1)
-        {
-          $(student).append('<label for="'+ student.id +'" id="first_'+ student.id +'" class="preference">'+ first_pref +'</label>');
+          if (first_pref != -1)
+          {
+            $(student).append('<label for="'+ student.id +'" id="first_'+ student.id +'" class="preference">'+ first_pref +'</label>');
+          }
         }
-        var second_pref = grouplist.map(function(obj) 
+
+        if (classlist[i].second)
+        {
+          var second_pref = grouplist.map(function(obj) 
           {return obj.id; }).indexOf(classlist[i].second);
-        if (second_pref != -1)
-        {
-        $(student).append('<label for="'+ student.id +'" id="second_'+ student.id +'" class="preference">'+ second_pref +'</label>');
+          if (second_pref != -1)
+          {
+          $(student).append('<label for="'+ student.id +'" id="second_'+ student.id +'" class="preference">'+ second_pref +'</label>');
+          }
         }
-        var third_pref = grouplist.map(function(obj) 
+        
+        if (classlist[i].third)
+        {
+          var third_pref = grouplist.map(function(obj) 
           {return obj.id; }).indexOf(classlist[i].third);
-        if (third_pref != -1)
-        {
-          $(student).append('<label for="'+ student.id +'" id="third_'+ student.id +'" class="preference">'+ third_pref +'</label>');
-        }
+          if (third_pref != -1)
+          {
+            $(student).append('<label for="'+ student.id +'" id="third_'+ student.id +'" class="preference">'+ third_pref +'</label>');
+          }
+        } 
     }
     var group_ul = document.getElementById(classlist[i].group);
     $(group_ul).append(student);
-    if (student.id) changeColor(student);
+    changeColor(student);
     checkLocks(classlist[i]);
   }
 }
 
 function uploadClass(student_data, group_data) 
 {
-  for (var i = 0; i < student_data.length-1; ++i)
+  for (var i = 0; i < student_data.length; ++i)
   {
-
     if (!student_data[i].id) continue;
-    var student = new Student(student_data[i]);
-    classlist[classlist.length] = student;
+    var find_student = classlist.map(function(obj) 
+        {return obj.id; }).indexOf(student_data[i].id);
+
+    if (find_student != -1) updateStudent(student_data[i], classlist[find_student]);
+    else 
+    {
+      var student = new Student(student_data[i]);
+      classlist[classlist.length] = student;
+    }
+    for (var j = 0; j < classlist.length; ++j)
+    {
+      var find_student_data = student_data.map(function(obj) 
+        {return obj.id; }).indexOf(classlist[j].id);
+      if (find_student_data === -1) classlist.splice(j,1);
+    }
   }
-  for (var i = 0; i < group_data.length-1; ++i)
+  for (var i = 0; i < group_data.length; ++i)
   {
     if (!group_data[i].id) continue;
-    var group = new Group(group_data[i]);
-    grouplist[grouplist.length] = group;
+    var find_group = grouplist.map(function(obj) 
+        {return obj.id; }).indexOf(group_data[i].id);
+    if (find_group != -1) updateGroup(group_data[i], grouplist[find_group]);
+    else
+    {
+      var group = new Group(group_data[i]);
+      grouplist[grouplist.length] = group;
+    }
   }
 }
-
-// function updateClass(student_data, group_data) 
-// {
-//   for (var i = 0; i < student_data.length-1; ++i)
-//   {
-//     var inClass = classlist.map(function(obj) 
-//         {return obj.id; }).indexOf(student_data[i].id);
-//     if (inClass != -1)//in class
-//     {
-//       var student = classlist[inClass];
-//       if ($('#gender').prop("checked")) student.gender = student_data[i].gender;
-//       if ($('#score').prop("checked")) student.score = student_data[i].score;
-//       if ($('#stud_pref').prop("checked"))
-//       {
-//         if (student_data[i].first != undefined ) student.first = student_data[i].first;
-//         if (student_data[i].second != undefined ) student.second = student_data[i].second;
-//         if (student_data[i].third != undefined ) student.third = student_data[i].third;
-//       }
-//     }
-//     else
-//     {
-//       if (!student_data[i].id || student_data[i].id === null) continue;
-//       var student = new Student(student_data[i]);
-//       classlist[classlist.length] = student;
-//     }
-//   }
-//   for (var i = 0; i < group_data.length-1; ++i)
-//   {
-//     var inGroup = grouplist.map(function(obj) 
-//         {return obj.id; }).indexOf(group_data[i].id);
-//     if (inGroup != -1)//in class
-//     {
-//       var group = grouplist[inGroup];
-//       group.presenter = group_data[i].presenter;
-//       var pres_index = classlist.map(function(obj) 
-//           {return obj.id; }).indexOf(group.presenter);
-//       classlist[pres_index].presenter = group.id;
-//       group.preferred = [];
-//       for (var j = 1; j < num_pref; ++j)
-//       {
-//         if (group_data[i]["preference_"+j] === undefined ) continue;
-//         group.preferred[group.preferred.length] = group_data[i]["preference_"+j];
-//       }
-//     }
-//     else
-//     {
-//       if (!group_data[i].groupname) continue;
-//       var group = new Group(group_data[i]);
-//       grouplist[grouplist.length] = group;
-//     }
-//   }
-// }
 
 function Student(data)
 {
   this.id = data.id;
-  if ($('#gender').prop("checked")) this.gender = data.gender;
-  if ($('#score').prop("checked")) this.score = data.score;
+  if ($('#gender').prop("checked") && data.gender) this.gender = data.gender;
+  if ($('#score').prop("checked") && data.score) this.score = data.score;
   if ($('#stud_pref').prop("checked"))
   {
-    if (data.first != undefined && data.first != "") this.first = data.first;
-    if (data.second != undefined && data.second != "") this.second = data.second;
-    if (data.third != undefined && data.third != "") this.third = data.third;
+    if (data.first) this.first = data.first;
+    if (data.second) this.second = data.second;
+    if (data.third) this.third = data.third;
   }
   this.presenter = -1;
   this.group = "sortable_class";
   this.locked = false;
 }
 
+function updateStudent(data, student)
+{
+  if ($('#gender').prop("checked") && data.gender) student.gender = data.gender;
+  else delete student.gender;
+  if ($('#score').prop("checked") && data.score) student.score = data.score;
+  else delete student.score;
+  if ($('#stud_pref').prop("checked"))
+  {
+    if (data.first) student.first = data.first;
+    else delete student.first;
+    if (data.second) student.second = data.second;
+    else delete student.second;
+    if (data.third) student.third = data.third;
+    else delete student.third;
+  }
+}
+
 function Group(data)
 {
   this.id = data.id;
-  this.presenter = data.presenter;
-  var pres_index = classlist.map(function(obj) 
-      {return obj.id; }).indexOf(this.presenter);
-  classlist[pres_index].presenter = this.id;
+  if (data.presenter) 
+  {
+    this.presenter = data.presenter;
+    var pres_index = classlist.map(function(obj) 
+        {return obj.id; }).indexOf(this.presenter);
+    if (pres_index != -1) classlist[pres_index].presenter = this.id;
+  }
   this.count = 0;
   this.deleted = false;
   this.preferred = [];
   for (var i = 1; i < num_pref; ++i)
   {
-    if (data["preference_"+i] === undefined ) continue;
+    if (!data["preference_"+i]) continue;
     this.preferred[this.preferred.length] = data["preference_"+i];
+  }
+}
+
+function updateGroup(data, group)
+{
+  if (data.presenter) 
+  {
+    group.presenter = data.presenter;
+    var pres_index = classlist.map(function(obj) 
+        {return obj.id; }).indexOf(group.presenter);
+    if (pres_index != -1) {
+      classlist[pres_index].presenter = group.id;
+    }
+  }
+  else delete group.presenter;
+  group.preferred = [];
+  for (var i = 1; i < num_pref; ++i)
+  {
+    if (!data["preference_"+i]) continue;
+    group.preferred[group.preferred.length] = data["preference_"+i];
   }
 }
 

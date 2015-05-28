@@ -91,9 +91,6 @@ app.get('/sortinghat', function (req, res) {
 app.post('/sortinghat', function (req, res) {
     classlist = [];
     grouplist = [];
-    console.log("POST COUNT = " + post_count);
-    post_count++;
-    console.log(req.body.classlist);
     setClasslist(req.body.classlist);
     setGrouplist(req.body.grouplist);
     setSettings(req.body.settings);

@@ -9,10 +9,11 @@ Disregards: max/min size, gender
 $( "#sort_frst" ).click(function() {
     if ($('#stud_pref').prop("checked"))
     {
-        for (var i = 0; i < classlist.length; ++i)
+        var srt_class = $("#sortable_class").children('li');
+        for (var i = srt_class.length-1; i >=0; --i)
         {
-            if (classlist[i].locked) continue;
-            addStudentFromList(classlist[i]);
+            var student = classlist[getClasslistIndex(srt_class[i].id)];
+            addStudentFromList(student);
         }
         if ($('#score').prop("checked")) $("#ordr_scr").trigger("click");
     }

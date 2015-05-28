@@ -30,8 +30,6 @@ $('#upload').click(function() {
   var student_data = student_HT.getData();
   var group_data = group_HT.getData();
   uploadClass(student_data, group_data);
-  console.log(classlist);
-  console.log(grouplist);
   uploadGroupData();
   uploadStudentData();
 
@@ -80,6 +78,7 @@ function uploadGroupData() {
     var tr = document.createElement("TR");
     for (var i = 0; i < 3 && count < grouplist.length; ++i)
     {
+      if (!grouplist[i]) continue;
       var td = document.createElement("TD");
       var group_obj = document.createElement("DIV");
       group_obj.id = "obj_"+grouplist[count].id;
@@ -213,6 +212,7 @@ function uploadClass(student_data, group_data)
       var find_student_data = student_data.map(function(obj) 
         {return obj.id; }).indexOf(classlist[j].id);
       if (find_student_data === -1) classlist.splice(j,1);
+      if (!classlist[j].id) classlist.splice(j,1);
     }
   }
   for (var i = 0; i < group_data.length; ++i)
@@ -225,6 +225,13 @@ function uploadClass(student_data, group_data)
     {
       var group = new Group(group_data[i]);
       grouplist[grouplist.length] = group;
+    }
+    for (var j = 0; j < grouplist.length; ++j)
+    {
+      var find_group_data = group_data.map(function(obj) 
+        {return obj.id; }).indexOf(grouplist[j].id);
+      if (find_group_data === -1) grouplist.splice(j,1);
+      if (!grouplist[j]) grouplist.splice(j,1);
     }
   }
 }

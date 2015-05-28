@@ -1,5 +1,6 @@
 $(document).ready( function() {
     $.get("/classinfo",function(data, status) {
+        num_pref = 1;
         for (var i = 0; i < data.classlist.length; ++i)
         {
             if (data.classlist[i].id === null) continue;
@@ -84,7 +85,17 @@ function repopulateHT(class_data, group_data, settings_data)
         group.deleted = group_data[i].deleted;
         for (var j = 0; j < group_data[i].preferred.length; ++j)
         {
-            group["preference_"+j] = group_data[i].preferred[j];
+            if ((j+1) >= num_pref) 
+            {
+                  var pref = 'preference_'+ num_pref; 
+                  var pref_team = 'PREFERRED TEAMMATE '+ num_pref; ++num_pref;
+                  gcols[gcols.length] = {data: pref};
+                  gcolH[gcolH.length] = pref_team;
+                  group_HT.updateSettings({columns: gcols});
+                  group_HT.updateSettings({colHeaders: gcolH});
+                  group_HT.render();
+            }
+            group["preference_"+(j+1)] = group_data[i].preferred[j];
         }
         group_HT_data[group_HT_data.length] = group;
 
@@ -96,7 +107,6 @@ function repopulateHT(class_data, group_data, settings_data)
 
 $('#save').click(function() {
     $("#upload_settings").trigger("click");
-    console.log(classlist); 
     sendDataToServer();
 });
 
@@ -106,7 +116,6 @@ $('#print').click(function() {
 });
 
 function sendDataToServer() {
-    console.log("posting");
   $.ajax({
         url: '/sortinghat', // Location of the service
         type: 'POST', //GET or POST or PUT or DELETE verb

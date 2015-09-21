@@ -152,7 +152,7 @@ function uploadStudentData() {
 
     $(student).append(" " + classlist[i].id + " ");
     if ($('#gender').prop("checked") && classlist[i].gender) $(student).append("M/F: " + classlist[i].gender + " ");
-    if ($('#score').prop("checked") && classlist[i].score) $(student).append("Score: " +classlist[i].score + " ");
+    if ($('#score').prop("checked") && classlist[i].score >=0) $(student).append("Score: " +classlist[i].score + " ");
     if ($('#stud_pref').prop("checked") && (classlist[i].first || classlist[i].second || classlist[i].third)) 
     {
         $(student).append("Prefs:");
@@ -240,7 +240,7 @@ function Student(data)
 {
   this.id = data.id;
   if ($('#gender').prop("checked") && data.gender) this.gender = data.gender;
-  if ($('#score').prop("checked") && data.score) this.score = data.score;
+  if ($('#score').prop("checked") && data.score >=0) this.score = data.score;
   if ($('#stud_pref').prop("checked"))
   {
     if (data.first) this.first = data.first;
@@ -256,7 +256,7 @@ function updateStudent(data, student)
 {
   if ($('#gender').prop("checked") && data.gender) student.gender = data.gender;
   else delete student.gender;
-  if ($('#score').prop("checked") && data.score) student.score = data.score;
+  if ($('#score').prop("checked") && data.score>=0) student.score = data.score;
   else delete student.score;
   if ($('#stud_pref').prop("checked"))
   {

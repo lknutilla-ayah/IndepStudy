@@ -8,9 +8,9 @@ Potential Workflow for Sorting
 
 If you wish to sort by gender:
 
-    1) Select: Sort Females into Top choices in the Class Sort Menu
+    1) Select: Sort women into Top choices in the Class Sort Menu
     2) Alter students to your liking
-    3) Select: Lock Females in the Group Sort Menu
+    3) Select: Lock women in the Group Sort Menu
 Otherwise, 
 
     1) Select: Sort Students into Top Preference in the Class Sort Menu
